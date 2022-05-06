@@ -44,4 +44,54 @@ void moveZeroes(vector<int>& nums) {
 // two sum
 // hashing or nlong
 
-    
+// take 3 pointers low , mid and high . where 0 to low-1 will be zero and high +1 end will be 2
+void sortColors(vector<int>& nums) {
+        int low=0;
+        int mid=0;
+        int high=nums.size()-1;
+        while(mid<=high){
+            if(nums[mid]==0){
+                swap(nums[mid],nums[low]);
+                low++;
+                mid++;
+            }
+            else if(nums[mid]==1){
+                mid++;
+            }
+            else{
+                swap(nums[mid],nums[high]);
+                high--;
+            }
+        }
+    }
+
+// set matrix zero
+// Assuming all the elements in the matrix are non-negative. Traverse through the matrix and if you find an element with value 0
+// , then change all the elements in its row and column to -1, except when an element is 0. The reason for not changing other 
+// elements to 0, but -1, is because that might affect other columns and rows. Now traverse through the matrix again and if an 
+// element is -1 change it to 0, which will be the answer.
+
+// minimum till now 
+int maxProfit(vector<int>& prices) {
+        int mini=INT_MAX;
+        int ans=0;
+        for(int i=0;i<prices.size();i++)
+        {
+            if(prices[i]>=mini) ans=max(ans,prices[i]-mini);
+            mini=min(mini,prices[i]);
+        }
+        return ans;
+    }
+
+// when we get a minima find next maxima and add difference to profit
+int maxProfit(vector<int>& a) {
+        int profit=0;
+        for(int i=1;i<a.size();i++){
+            if(a[i]>a[i-1]) profit+=(a[i]-a[i-1]);
+        }
+        return profit;
+    }
+
+
+
+
