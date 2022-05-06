@@ -109,3 +109,31 @@ int subarraysDivByK(vector<int>& nums, int k) {
         }
         return ans;   
     }
+
+
+// numbers are from 1 to n go to nums[nums[i]-1] and make it negative if it is not , and if it is negative push nums[i]
+// in vector as it make us go to the same index again 
+vector<int> findDuplicates(vector<int>& nums) {
+        vector<int> ans;
+        for(int i=0;i<nums.size();i++){
+            int n=abs(nums[i]);
+            if(nums[n-1]<0) ans.push_back(n);
+            else nums[n-1]*=-1;
+        }
+        return ans;
+    }
+
+// i at  0 and j at n-1 , calculate area and move pointer where height is less
+int maxArea(vector<int>& height) {
+        int ans=0;
+        int i=0;
+        int j=height.size()-1;
+        while(i<j){
+            ans=max(ans,(j-i)*min(height[i],height[j]));
+            if(height[i]<height[j]){
+                i++;
+            }
+            else j--;
+        }
+        return ans;
+    }
