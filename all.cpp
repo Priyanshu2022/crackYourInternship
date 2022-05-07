@@ -137,3 +137,100 @@ int maxArea(vector<int>& height) {
         }
         return ans;
     }
+
+// maximum score from cards
+// calculate sum of first k , then check all possible cases by
+// subtracting last from first k and adding last element from n
+int maxScore(vector<int>& cardPoints, int k) {
+        int temp=0,sum;
+        int n=cardPoints.size();
+        for(int i=0;i<k;i++){
+            temp+=cardPoints[i];
+        }
+        sum=temp;
+        for(int i=0;i<k;i++){
+            temp=temp-cardPoints[k-i-1]+cardPoints[n-i-1];
+            sum=max(sum,temp);
+        }
+        return sum;
+    }
+
+// starting with one zero sum subarray 
+int subarraySum(vector<int>& nums, int k) {
+        map<int,int> mp;
+        mp[0]=1;
+        int ans=0;
+        int sum=0;
+        for(int i=0;i<nums.size();i++){
+            sum+=nums[i];
+            if(mp.find(sum-k)!=mp.end()){
+                ans+=mp[sum-k];
+            }
+            mp[sum]++;
+        }
+        return ans;
+    }
+
+vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        vector<int> ans;
+        int rowStart=0,rowEnd=matrix.size()-1,colStart=0,colEnd=matrix[0].size()-1;
+        int total=matrix.size()*matrix[0].size();
+        int count=0;
+        while(count<total){
+            for(int index=colStart;count<total&&index<=colEnd;index++){
+                ans.push_back(matrix[rowStart][index]);
+                count++;
+            }
+            rowStart++;
+            for(int index=rowStart;count<total&&index<=rowEnd;index++){
+                ans.push_back(matrix[index][colEnd]);
+                count++;
+            }
+            colEnd--;
+            for(int index=colEnd;count<total&&index>=colStart;index--){
+                ans.push_back(matrix[rowEnd][index]);
+                count++;
+            }
+            rowEnd--;
+            for(int index=rowEnd;count<total&&index>=rowStart;index--){
+                ans.push_back(matrix[index][colStart]);
+                count++;
+            }
+            colStart++;
+        }
+        
+        return ans;
+    }
+
+// last kaha se jump karsakte hai
+bool canJump(vector<int>& nums) {
+        int n = nums.size();
+        int last=n-1;
+        for(int i=n-2;i>=0;i--){
+            if(nums[i]+i>=last) last=i;
+        }
+        return last==0;
+    }
+
+
+// bfs
+bool bfs(vector<vector<char>>& board,int i,int j,string word,int index,vector<vector<int>> &vis){
+        if(index==word.length()) return true;
+        if(i>=board.size() || j>=board[0].size() || i<0 || j<0) return false;
+        if(board[i][j]!=word[index]) return false;
+        if(vis[i][j]) return false;
+        else vis[i][j]=1;
+        if(bfs(board,i+1,j,word,index+1,vis) || bfs(board,i-1,j,word,index+1,vis) || bfs(board,i,j+1,word,index+1,vis) || bfs(board,i,j-1,word,index+1,vis)) return true;
+        vis[i][j]=0;
+        return false;
+    }
+    bool exist(vector<vector<char>>& board, string word) {
+        vector<vector<int>> vis(board.size(),vector<int>(board[0].size(),0));
+        for(int i=0;i<board.size();i++){
+            for(int j=0;j<board[0].size();j++){
+                if(bfs(board,i,j,word,0,vis)) return true;
+            }
+        }
+        return false;
+    }
+
