@@ -234,3 +234,123 @@ bool bfs(vector<vector<char>>& board,int i,int j,string word,int index,vector<ve
         return false;
     }
 
+
+
+// calculate next smaller elements and prev smaller element
+// then calulate area
+// if next[i]==-1 next[i]=n (max)
+// prev[i]==-1 then breadth is already (min)
+// breadth=next[i]-prev[i]+1
+vector<int> nextSmaller(vector<int> & heights,int n){
+        stack<int> st;
+        st.push(-1);
+        vector<int> ans(n);
+        for(int i=n-1;i>=0;i--){
+            while(st.top()!=-1 && heights[st.top()]>=heights[i]) st.pop();
+            ans[i]=st.top();
+            st.push(i);
+        }
+        return ans;
+    }
+    vector<int> prevSmaller(vector<int> & heights,int n){
+        stack<int> st;
+        st.push(-1);
+        vector<int> ans(n);
+        for(int i=0;i<n;i++){
+            while(st.top()!=-1 && heights[st.top()]>=heights[i]) st.pop();
+            ans[i]=st.top();
+            st.push(i);
+        }
+        return ans;
+    }
+    int largestRectangleArea(vector<int>& heights) {
+        int n=heights.size();
+        vector<int> next;
+        next=nextSmaller(heights,n);
+        vector<int> prev;
+        prev=prevSmaller(heights,n);
+        int ans=0;
+        for(int i=0;i<n;i++){
+            if(next[i]==-1) next[i]=n;
+            ans=max(ans,heights[i]*(next[i]-prev[i]-1));
+        }
+        return ans;
+    }
+
+
+int majorityElement(vector<int>& a) {
+        int count=0;
+        int element=-1;
+        for(int i=0;i<a.size();i++){
+            if(count==0) element=a[i];
+            if(element==a[i]) count++;
+            else count--;
+        }
+        return element;
+    }
+
+// x is given in sorted order , and i<j 
+    // therefore x[i]<x[j]
+    // the equation becomes yi+yj+xj-xi=xj+yj+(yi-xi)
+    // we can store yi-xj which is changing in priority queue
+    // for current point we will check the maximum value of yi-xi
+    int findMaxValueOfEquation(vector<vector<int>>& points, int k) {
+        priority_queue<pair<int,int>> pq;
+        int ans=INT_MIN;
+        for(int i=0;i<points.size();i++){
+            while((!pq.empty())&&abs(pq.top().second-points[i][0])>k) pq.pop();
+            if(!pq.empty()){
+                ans=max(ans,points[i][0]+points[i][1]+pq.top().first);
+            }
+            pq.push({points[i][1]-points[i][0],points[i][0]});
+        }
+        return ans;
+    }
+
+// merge two sorted arrays
+// GAP method
+//Initially take the gap as (m+n)/2;
+// Take as a pointer1 = 0 and pointer2 = gap.
+// Run a oop from pointer1 &  pointer2 to  m+n and whenever arr[pointer2]<arr[pointer1], just swap those.
+// After completion of the loop reduce the gap as gap=gap/2.
+// Repeat the process until gap>0.
+
+
+int merge(vector<int>& nums,int start,int end,int mid){
+        int count=0;
+        int l=start,h=mid+1;
+        while(l<=mid && h<=end){
+            if((long long int)nums[l]>(long long int)2*nums[h]){
+                count+=(mid-l+1);
+                h++;
+            }
+            else l++;
+        }
+        int temp[end-start+1];
+        int t=0;
+        l=start,h=mid+1;
+        while(l<=mid && h<=end){
+            if(nums[l]>nums[h]){
+                temp[t++]=nums[h++];
+            }
+            else temp[t++]=nums[l++];
+        }
+        while(l<=mid) temp[t++]=nums[l++];
+        while(h<=end) temp[t++]=nums[h++];
+        for(int i=0;i<end-start+1;i++){
+            nums[start+i]=temp[i];
+        }
+        return count;
+    }
+    int mergeSort(vector<int>& nums,int start,int end){
+        if(start>=end) return 0;
+        int mid=(start+end)/2;
+        int count=mergeSort(nums,start,mid);
+        count+=mergeSort(nums,mid+1,end);
+        count+=merge(nums,start,end,mid);
+        return count;
+    }
+    int reversePairs(vector<int>& nums) {
+        return mergeSort(nums,0,nums.size()-1);
+    }
+
