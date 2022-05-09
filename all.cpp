@@ -354,3 +354,148 @@ int merge(vector<int>& nums,int start,int end,int mid){
         return mergeSort(nums,0,nums.size()-1);
     }
 
+// for(i to n){
+// {for(j to m){
+// if([j]!=[i]) bool false and break;
+int strStr(string haystack, string needle) {
+        for(int i=0;i<haystack.size();i++){
+            bool f=1;
+            for(int j=0;j<needle.size();j++){
+                if(needle[j]!=haystack[i+j]){
+                    f=0;
+                    break;
+                }
+            }
+            if(f) return i;
+        }
+        return -1;
+    }
+
+
+// if it is an open bracket push it
+// else check if top has corresponding open 
+bool isValid(string s) {
+        stack<char> st;
+        for(int i=0;i<s.length();i++)
+        {
+            if(s[i]=='(' || s[i]=='{' || s[i]=='[')
+            {
+                st.push(s[i]);
+            }
+            else if(st.empty()){
+                return false;
+            }
+            if(s[i]==')')
+            {
+                if(st.top()!='(') return false;
+                else st.pop();
+            }
+            if(s[i]=='}')
+            {
+                if(st.top()!='{') return false;
+                else st.pop();
+            }
+            if(s[i]==']')
+            {
+                if(st.top()!='[') return false;
+                else st.pop();
+            }
+        }
+        return st.empty();
+
+        
+        
+    }
+
+
+// take first string and
+// loop through it and match its element by iterating in rest all strings
+string longestCommonPrefix(vector<string>& strs) {
+        string ans="";
+        for(int i=0;i<strs[0].size();i++){
+            bool f=1;
+            for(int j=1;j<strs.size();j++){
+                if(i>=strs[j].size() || strs[0][i]!=strs[j][i]){
+                    f=0;
+                    break;
+                }
+            }
+            if(f) ans+=strs[0][i];
+            else break;
+        }
+        return ans;
+    }
+
+// valid palindrome after deleting atmost one character
+bool helper(string &s,int l,int h,int count){
+        if(count>1) return false;
+        while(l<=h){
+            if(s[l]==s[h]){
+                l++;
+                h--;
+            }
+            else{
+                return helper(s,l+1,h,count+1) || helper(s,l,h-1,count+1);
+            }
+        }
+        return true;
+    }
+    bool validPalindrome(string s) {
+        return helper(s,0,s.length()-1,0);
+    }
+
+// generate all parantheses
+// have a count of open and close bracket
+void generate(vector<string> &ans,string &s,int n,int open,int close){
+        if(open==0 && close==0){
+            ans.push_back(s);
+            return;
+        }
+        if(open>0){
+            s+='(';
+            generate(ans,s,n,open-1,close);
+            s.pop_back();
+        }
+        if(close>0 && close>open){
+            s+=')';
+            generate(ans,s,n,open,close-1);
+            s.pop_back();
+        }
+    }
+    vector<string> generateParenthesis(int n) {
+        vector<string> ans;
+        string s="";
+        generate(ans,s,n,n,n);
+        return ans;
+    }
+
+// store all numbers according to roman in a vector
+// iterate through the vector in descending order and
+// check if it is greater than num or not 
+// if num is greater subtract and add it to the string
+string intToRoman(int num) {
+        vector<pair<int,string>> v;
+        v.push_back({1000,"M"});
+        v.push_back({900,"CM"});
+        v.push_back({500,"D"});
+        v.push_back({400,"CD"});
+        v.push_back({100,"C"});
+        v.push_back({90,"XC"});
+        v.push_back({50,"L"});
+        v.push_back({40,"XL"});
+        v.push_back({10,"X"});
+        v.push_back({9,"IX"});
+        v.push_back({5,"V"});
+        v.push_back({4,"IV"});
+        v.push_back({1,"I"});
+        string ans="";
+        
+        for(int i=0;i<v.size();i++){
+            while(num>=v[i].first){
+                num-=v[i].first;
+                ans+=v[i].second;
+            }
+        }
+        return ans;
+    }
+
