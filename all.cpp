@@ -600,3 +600,113 @@ int dp[501][2001];
         memset(dp,-1,sizeof(dp));
         return solve(0,k,arr,k);
     } 
+
+
+// rabin Karp
+// rolling hash
+// AABAACAADAABAABA   AABA
+// occurances of AABA in 1st string
+// one of the naive hash function can be A->1 B->2
+// AABA = 1+1+2+1=5
+// we will check window of 4 and check if its hash is same then we will compare
+// hashing function's can be improved
+
+    // digit
+    // e / E => must come up once , digit must be present before,cannot be at last
+    // dot => once,e cannot come before this,last and no digit before
+    // +/- => can come at start and after e
+    bool isNumber(string s) {
+        bool digit=false,e=false,dot=false;
+        int countPlusMinus=0;
+        for(int i=0;i<s.length();i++){
+            if(isdigit(s[i])){
+                digit=true;
+            }
+            else if(s[i]=='e' || s[i]=='E'){
+                if(digit==false || e==true || i==s.length()-1 ) return false;
+                e=true;
+            }
+            else if(s[i]=='.'){
+                if(dot || e==true || (i==s.length()-1 && digit==false) ) return false;
+                dot=true;
+            }
+            else if(s[i]=='+' || s[i]=='-'){
+                if(countPlusMinus==2) return false;
+                if((i>0 && (s[i-1]!='e' && s[i-1]!='E')) || i==s.length()-1) return false;
+                countPlusMinus++;
+            }
+            else return false;
+        }
+        return true;
+    }
+
+
+// rabbbit rabbit
+// number of times 2nd string occur as a subsequence in 1st string
+// i=n-1, j=m-1
+// if s[i]==t[j] there are two options either we can consider a[j] as occurence or look for anotheer
+// therefore i-1 j-1(included) + i-1 j(not included)
+// else i-1 j(cannot include)
+int solve(string &s ,string &t,int index1,int index2,vector<vector<int>> &dp){
+        if(index2<0) return 1;
+        if(index1<0) return 0;
+        if(dp[index1][index2]!=-1) return dp[index1][index2];
+        if(s[index1]==t[index2]){
+            return dp[index1][index2]=(solve(s,t,index1-1,index2-1,dp)+solve(s,t,index1-1,index2,dp));
+        }
+        else return dp[index1][index2]=solve(s,t,index1-1,index2,dp);
+    }
+    int numDistinct(string s, string t) {
+        vector<vector<int>> dp(s.length(),vector<int>(t.length(),-1));
+        return solve(s,t,s.length()-1,t.length()-1,dp);
+    }
+
+
+vector<string> fullJustify(vector<string>& words, int maxWidth) {
+        int i=0;
+        vector<string> ans;
+        while(i<words.size()){
+            int wc=words[i].length();
+            int j=i+1;
+            int spaces=0;
+            while(j<words.size() && wc+words[j].length()+1+spaces<=maxWidth){
+                wc+=words[j].length();
+                spaces++;
+                j++;
+            }
+            int vac=maxWidth-wc;
+            int atleast= spaces==0 ?0:vac/spaces;
+            int extra= spaces==0 ? 0:vac%spaces;
+            string temp="";
+            if(j>=words.size()){ // last line
+                for(int k=i;k<j;k++){
+                    temp+=words[k];
+                    if(vac){
+                        temp+=" ";
+                        vac--;
+                    }
+                }
+                while(vac) temp+=" ",vac--;
+            }
+            else if(j-i==1){ // only one string 
+                temp+=words[i];
+                for(int m=0;m<vac;m++) temp+=" ";
+            }
+            else{
+                for(int k=i;k<j;k++){
+                    temp+=words[k];
+                    if(k==j-1) continue;
+                    for(int m=0;m<atleast;m++) temp+=" ";
+                    if(extra){
+                        temp+=" ";
+                        extra--;
+                    }
+                }
+            }
+            ans.push_back(temp);
+            i=j;
+        }
+        return ans;
+    }
+
+
