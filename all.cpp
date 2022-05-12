@@ -766,3 +766,329 @@ string ones[20] = {"","One ","Two ","Three ","Four ",
         return ans;
         
     }
+
+
+// Ceiling in a sorted array
+// given sorted array and x
+// find it's ceil(smallest element greater or equal to x)
+// use binary search
+
+
+// pair with given difference
+bool findPair(int arr[], int size, int n){
+    int i=0;
+    int j=1;
+    sort(arr,arr+size);
+    while(i<size && j<size){
+        if(arr[j]-arr[i]==n && i!=j) return true;
+        else if(arr[j]-arr[i]>n) i++;
+        else j++;
+    }
+    return false;
+}
+
+
+// maximal rectangle 
+// given binary matrix
+// find maximal rectangle of 1's
+// 1 0 1 0 0 
+// 1 0 1 1 1
+// 1 1 1 1 1 
+// 1 0 0 1 0
+// move from row 1 to last (curRow) and calculate area if it was a histogram(it is like a histogram)
+// add lower row one by one (if element is 0 curRow[j]=0 else curRow[j]++)
+// return the maximum area
+vector<int> nextSmaller(vector<int> & heights,int n){
+        stack<int> st;
+        st.push(-1);
+        vector<int> ans(n);
+        for(int i=n-1;i>=0;i--){
+            while(st.top()!=-1 && heights[st.top()]>=heights[i]) st.pop();
+            ans[i]=st.top();
+            st.push(i);
+        }
+        return ans;
+    }
+    vector<int> prevSmaller(vector<int> & heights,int n){
+        stack<int> st;
+        st.push(-1);
+        vector<int> ans(n);
+        for(int i=0;i<n;i++){
+            while(st.top()!=-1 && heights[st.top()]>=heights[i]) st.pop();
+            ans[i]=st.top();
+            st.push(i);
+        }
+        return ans;
+    }
+    int maxHistogram(vector<int>& heights) {
+        int n=heights.size();
+        vector<int> next;
+        next=nextSmaller(heights,n);
+        vector<int> prev;
+        prev=prevSmaller(heights,n);
+        int ans=0;
+        for(int i=0;i<n;i++){
+            if(next[i]==-1) next[i]=n;
+            ans=max(ans,heights[i]*(next[i]-prev[i]-1));
+        }
+        return ans;
+    }
+    int maximalRectangle(vector<vector<char>>& matrix) {
+        vector<vector<int>> mat(matrix.size(),vector<int>(matrix[0].size(),0));
+        for(int i=0;i<matrix.size();i++){
+            for(int j=0;j<matrix[0].size();j++){
+                if(matrix[i][j]=='1') mat[i][j]=1;
+            }
+        }
+        vector<int> curRow=mat[0];
+        int maxAns=maxHistogram(curRow);
+        for(int i=1;i<mat.size();i++){
+            for(int j=0;j<mat[0].size();j++){
+                if(mat[i][j]==1){
+                    curRow[j]++;
+                }
+                else curRow[j]=0;
+            }
+            int curAns=maxHistogram(curRow);
+            maxAns=max(curAns,maxAns);
+        }
+        return maxAns;
+    }
+
+
+  // number of islands
+  // ["1","1","1","1","0"],
+  // ["1","1","0","1","0"],
+  // ["1","1","0","0","0"],
+  // ["0","0","0","0","0"]
+// check every element if it's one and not visited
+// run dfs on it 
+void dfs(vector<vector<char>> &grid,vector<vector<int>> &vis,int i,int j){
+        if(i<0 || j<0 || i>=grid.size() || j>=grid[0].size()) return; 
+        if(grid[i][j]=='0') return;
+        if(vis[i][j]!=-1) return ;
+        vis[i][j]=1;
+        dfs(grid,vis,i+1,j);
+        dfs(grid,vis,i-1,j);
+        dfs(grid,vis,i,j+1);
+        dfs(grid,vis,i,j-1);
+    }
+    int numIslands(vector<vector<char>>& grid) {
+        int ans=0;
+        vector<vector<int>> vis(grid.size(),vector<int>(grid[0].size(),-1));
+        for(int i=0;i<grid.size();i++){
+            for(int j=0;j<grid[0].size();j++){
+                if(grid[i][j]=='1' && vis[i][j]==-1){
+                    ans++;
+                    dfs(grid,vis,i,j);
+                }
+            }
+        }
+        return ans;
+    }
+
+
+
+// Permute two arrays such that sum of every pair is greater or equal to K
+// sort 1st array ascending and the other descending
+// now check sum of ith elements
+
+
+// find post order from inorder and pre order
+// first elements of preorder will give root node's 
+// then according to root node divide inorder in left and right half
+int search(int arr[], int x, int n) 
+{ 
+    for (int i = 0; i < n; i++) 
+        if (arr[i] == x) 
+            return i; 
+    return -1; 
+} 
+
+void printPostOrder(int in[], int pre[], int n) 
+{ 
+    int root = search(in, pre[0], n); 
+    if (root != 0) 
+        printPostOrder(in, pre + 1, root); 
+    if (root != n - 1) 
+        printPostOrder(in + root + 1, pre + root + 1, n - root - 1); 
+    cout << pre[0] << " "; 
+} 
+
+
+// for every element product of array except self
+// if prod!=0 simply prod/nums[i]
+// else check if zeros are present how many times
+// if zeros are greater than or equal to two every answer will be 0
+// else excet that 0 every answer will be 0
+vector<int> productExceptSelf(vector<int>& nums) {
+        vector<int> ans;
+        int prod=1;
+        int zeros=0;
+        for(int i=0;i<nums.size();i++) prod*=nums[i],nums[i]==0?zeros++:1;
+        if(prod!=0){
+            for(int i=0;i<nums.size();i++){
+                ans.push_back(prod/nums[i]);
+            }
+        }
+        else{
+            if(zeros>=2){
+                for(int i=0;i<nums.size();i++) ans.push_back(0);
+            }
+            else{
+                prod=1;
+                for(int i=0;i<nums.size();i++){
+                    if(nums[i]!=0) prod*=nums[i];
+                }
+                for(int i=0;i<nums.size();i++){
+                    if(nums[i]!=0){
+                        ans.push_back(0);
+                    }
+                    else ans.push_back(prod);
+                }
+            }
+        }
+        return ans;
+    }
+
+
+// Check if reversing a sub array make the array sorted
+// 1st -> N*N
+// 2nd -> NlogN 
+// The idea is to compare the given array with the sorted array. Make a copy of the given array and sort it. Now, find // the first index and last index which do not match with sorted array. If no such indices are found, print “Yes”. 
+// Else check if the elements between the indices are in decreasing order.
+// 3rd -> 1st array should be increasing , then decreasing , then increasing
+
+
+// rotate image
+void rotate(vector<vector<int>>& matrix) {
+        for(int i=0;i<matrix.size();i++){
+            for(int j=0;j<i;j++){
+                swap(matrix[i][j],matrix[j][i]);
+            }
+        }
+        for(int i=0;i<matrix.size();i++){
+            reverse(matrix[i].begin(),matrix[i].end());
+        }
+
+    }
+
+
+// '.' as current directory
+// '..' as parent directory
+// '/' ignore firstly
+// else everything is directory name
+// put names in stack , if '..' comes pop the top one
+// then make ans by popping
+string simplifyPath(string path) {
+        stack<string> st;
+        for(int i=0;i<path.length();i++){
+            if(path[i]=='/') continue;
+            string temp="";
+            int j=i;
+            while(j<path.length() && path[j]!='/'){
+                temp+=path[j];
+                j++;
+            }
+            if(temp.length()==2 && temp[0]=='.' && temp[1]=='.'){
+                    if(!st.empty()) st.pop();
+            }
+            else if(temp.length()==1 && temp[0]=='.') continue;
+            else st.push(temp);
+            i=j;
+        }
+        string ans="";
+        if(st.empty()){
+            ans+='/';
+        }
+        else{
+            while(!st.empty()){
+                ans='/'+st.top()+ans;
+                st.pop();
+            }
+        }
+        return ans;
+        
+    }
+
+
+vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        vector<int> ans;
+        int rowStart=0,rowEnd=matrix.size()-1,colStart=0,colEnd=matrix[0].size()-1;
+        int total=matrix.size()*matrix[0].size();
+        int count=0;
+        while(count<total){
+            for(int index=colStart;count<total&&index<=colEnd;index++){
+                ans.push_back(matrix[rowStart][index]);
+                count++;
+            }
+            rowStart++;
+            for(int index=rowStart;count<total&&index<=rowEnd;index++){
+                ans.push_back(matrix[index][colEnd]);
+                count++;
+            }
+            colEnd--;
+            for(int index=colEnd;count<total&&index>=colStart;index--){
+                ans.push_back(matrix[rowEnd][index]);
+                count++;
+            }
+            rowEnd--;
+            for(int index=rowEnd;count<total&&index>=rowStart;index--){
+                ans.push_back(matrix[index][colStart]);
+                count++;
+            }
+            colStart++;
+        }
+        
+        return ans;
+    }
+
+
+// surrounded regions
+// means regions of O's not connected to edge , we have to mark them x
+// first we will change all O in corner(edges) and it's connected O's to * 
+// then change the remaining O's to X 
+// then we will again change the * to O
+void change(vector<vector<char>> &board,int x,int y){
+        board[x][y]='*';
+        int dx[]={0,0,1,-1};
+        int dy[]={1,-1,0,0};
+        for(int i=0;i<4;i++){
+            int cx=x+dx[i];
+            int cy=y+dy[i];
+            if(cx>=0 && cx<board.size() && cy>=0 && cy<board[0].size()){
+                if(board[cx][cy]=='O') change(board,cx,cy);
+            }
+        }
+    }
+    void solve(vector<vector<char>>& board) {
+        // first we will change all O in corner and it's connected O's to * 
+        // then change the remaining O's to X 
+        // then we will again change the * to O
+        
+        for(int i=0;i<board.size();i++){
+            for(int j=0;j<board[0].size();j++){
+                if(i==0 || j==0 || i==board.size()-1 || j==board[0].size()-1){
+                    if(board[i][j]=='O'){
+                        change(board,i,j);
+                    }
+                }
+            }
+        }
+        
+        for(int i=0;i<board.size();i++){
+            for(int j=0;j<board[0].size();j++){
+                if(board[i][j]=='O'){
+                    board[i][j]='X';
+                }
+            }
+        }
+        
+        for(int i=0;i<board.size();i++){
+            for(int j=0;j<board[0].size();j++){
+                if(board[i][j]=='*') board[i][j]='O';
+            }
+        }
+        
+    }
+
