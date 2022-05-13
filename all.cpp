@@ -1104,3 +1104,363 @@ int findPeakElement(vector<int>& nums) {
         }
         return h;
     }
+
+
+
+// aggressive cows
+// low=0
+// high=a[n-1]
+// mid is minimum distance between two cows
+#include <bits/stdc++.h>
+using namespace std;
+ 
+bool isPossible(int a[],int mid,int c,int n){
+    int cowCount=1;
+    int lastPos=a[0];
+    for(int i=0;i<n;i++){
+        if(a[i]-lastPos>=mid){
+            cowCount++;
+            if(cowCount==c) return true;
+            lastPos=a[i];
+        }
+    }
+    return false;
+}
+ 
+int main() {
+    int t;
+    cin>>t;
+    while(t--){
+        int n,c;
+        cin>>n>>c;
+        int a[n];
+        for(int i=0;i<n;i++) cin>>a[i];
+        sort(a,a+n);
+        int l=0;
+        int h=a[n-1];
+        int ans=-1;
+        while(l<=h){
+            int mid=l+(h-l)/2;
+            if(isPossible(a,mid,c,n)){
+                ans=mid;
+                l=mid+1;
+            }
+            else h=mid-1;
+        }
+        cout<<ans<<endl;
+    }
+    return 0;
+}  
+
+
+
+// allocate minimum number of pages
+// mid is maximum number of pages , given to a student
+bool isPossible(int a[],int n,int m,int mid){
+        int sum=0;
+        int student=1;
+        for(int i=0;i<n;i++){
+            if(sum+a[i]<=mid){
+                sum+=a[i];
+            }
+            else{
+                student++;
+                if(student>m || a[i]>mid) return false;
+                sum=a[i];
+            }
+        }
+        return true;
+    }
+    int findPages(int A[], int N, int M) 
+    {
+        int ans=-1;
+        int sum=0;
+        for(int i=0;i<N;i++) sum+=A[i];
+        int l=0;
+        int h=sum;
+        while(l<=h){
+            int mid=l+(h-l)/2;
+            if(isPossible(A,N,M,mid)){
+                ans=mid;
+                h=mid-1;
+            }
+            else l=mid+1;
+        }
+        return ans;
+    }
+
+
+
+
+// Find position of an element in a sorted array of infinite numbers
+// int l=0,h=1 then l=h , h=h*2 untill we find target<=h
+
+
+//Bitonic array means it first increases then decreases
+
+
+
+// count of smaller after self
+// merge sort
+// vector of pair with element and its index , as we will have to store the count in a index
+// sort in descending order
+void merge(vector<int> &ans,vector<pair<int,int>> &v,int l,int h,int m){
+        vector<pair<int,int>> temp(h-l+1);
+        int i=l;
+        int j=m+1;
+        int k=0;
+        while(i<=m && j<=h){
+            if(v[i].first>v[j].first){
+                ans[v[i].second]+=h-j+1;
+                temp[k++]=v[i++];
+            }
+            else temp[k++]=v[j++];
+        }
+        while(i<=m) temp[k++]=v[i++];
+        while(j<=h) temp[k++]=v[j++];
+        for(int t=l;t<=h;t++){
+            v[t]=temp[t-l];
+        }
+    }
+    void mergeSort(vector<int> &ans,vector<pair<int,int>> &v,int l,int h){
+        if(l<h){
+            int m=l+(h-l)/2;
+            mergeSort(ans,v,l,m);
+            mergeSort(ans,v,m+1,h);
+            merge(ans,v,l,h,m);
+        }
+    }
+    vector<int> countSmaller(vector<int>& nums) {
+        vector<int> ans(nums.size(),0);
+        vector<pair<int,int>> v;
+        for(int i=0;i<nums.size();i++) v.push_back({nums[i],i});
+        mergeSort(ans,v,0,v.size()-1);
+        return ans;
+    }
+
+
+
+// first and last position in array
+vector<int> searchRange(vector<int>& nums, int target) {
+        int low=0;
+        int high=nums.size()-1;
+        int ans=-1;
+        while(low<=high){
+            int mid=(low+high)/2;
+            if(nums[mid]==target){
+                ans=mid;
+                high=mid-1;
+            }
+            else if(nums[mid]>target){
+                high=mid-1;
+            }
+            else if(nums[mid]<target){
+                low=mid+1;
+            }
+        }
+        low=0;
+        high=nums.size()-1;
+        int ans2=-1;
+        while(low<=high){
+            int mid=(low+high)/2;
+            if(nums[mid]==target){
+                ans2=mid;
+                low=mid+1;
+            }
+            else if(nums[mid]>target){
+                high=mid-1;
+            }
+            else if(nums[mid]<target){
+                low=mid+1;
+            }
+        }
+        vector<int> v;
+        v.push_back(ans);
+        v.push_back(ans2);
+        return v;
+    }
+
+
+// smallest letter greater than target
+// Note that the letters wrap around.
+char nextGreatestLetter(vector<char>& letters, char target) {
+        int l=0;
+        int h=letters.size()-1;
+        int ans=-1;
+        while(l<=h){
+            int m=(l+h)/2;
+            if(letters[m]>target){
+                ans=m;
+                h=m-1;
+            }
+            else l=m+1;
+        }
+        if(ans==-1) return letters[0];
+        else return letters[ans];
+    }
+
+
+
+// minimum swaps to put number less than k together
+// find count less than k
+// move in window of count
+// and find a window with maximum number less than k
+// then count-maxi will be answer
+int minSwap(int arr[], int n, int k) {
+        int count=0;
+        for(int i=0;i<n;i++){
+            if(arr[i]<=k) count++;
+        }
+        int temp=0;
+        for(int i=0;i<count;i++){
+            if(arr[i]<=k) temp++;
+        }
+        int maxi=temp;
+        int i=0;
+        for(int j=count;j<n;j++){
+            if(arr[i]<=k) temp--;
+            if(arr[j]<=k) temp++;
+            i++;
+            maxi=max(temp,maxi);
+        }
+        return count-maxi;
+    }
+
+
+// operation will be same to conver sorted to the given array
+// store in vector of pair as element and index
+// sort 
+int minSwaps(vector<int>&nums)
+    {
+        vector<pair<int,int>> v;
+        for(int i=0;i<nums.size();i++){
+            v.push_back({nums[i],i});
+        }
+        sort(v.begin(),v.end());
+        int ans=0;
+        for(int i=0;i<nums.size();i++){
+            int num=v[i].first;
+            int ind=v[i].second;
+            if(i!=ind){
+                ans++;
+                swap(v[i],v[ind]);
+                i--; // the element which came may not be at it's correct position
+            }
+        } 
+        return ans;
+    }
+
+
+// rotated by k , find k
+// index of pivot will be answer
+int findKRotation(int arr[], int n) {
+        int l=0;
+        int h=n-1;
+        int ans=0;
+        while(l<=h){
+            int m=(l+h)/2;
+            if(arr[m]>=arr[0]){
+                l=m+1;
+            }
+            else{
+                ans=m;
+                h=m-1;
+            }
+        }
+        return ans;
+    }
+
+
+
+// Search in an almost sorted array
+// means element which should be at i , can now be present at i-1,i,i+1
+// we will check in i-1,i,i+1
+// and reduce search space by mid-2, or mid+2
+
+
+ // find the pivot (comparing with first element)
+ // then check in which half the element can be present
+ int search(vector<int>& nums, int target) {
+        int n=nums.size();
+        int l=0;
+        int h=n-1;
+        int pivot=-1;
+        while(l<h){
+            int m=(l+h)/2;
+            if(nums[m]>=nums[0]) l=m+1;
+            else h=m;
+        }
+        pivot=l;
+        if(nums[pivot]<=target && target<=nums[n-1]){
+            l=pivot;
+            h=n-1;
+        }
+        else{
+            l=0;
+            h=pivot-1;
+        }
+        while(l<=h){
+            int m=(l+h)/2;
+            if(nums[m]==target) return m;
+            else if(nums[m]>target) h=m-1;
+            else l=m+1;
+        }
+        return -1;
+    }
+
+
+// every element in the array except one appers twice find that element
+int singleNonDuplicate(vector<int>& nums) {
+        int l=0;
+        int h=nums.size()-1;
+        while(l<h){
+            int m=(l+h)/2;
+            if((m%2==0 && nums[m]==nums[m+1]) || (m%2!=0 && nums[m]==nums[m-1])){
+                l=m+1;
+            }
+            else{
+                h=m;
+            }
+        }
+        return nums[h];
+    }
+
+
+// Given an array nums which consists of non-negative integers and an integer m, 
+// you can split the array into m non-empty continuous subarrays.
+// Write an algorithm to minimize the largest sum among these m subarrays
+// l=maximum element
+// h=sum of subarray
+// mid=maximum sum of a subarray
+int possibleSubarray(int mid,vector<int> &nums){
+        int subcount=1;
+        int curSum=0;
+        for(int i=0;i<nums.size();i++){
+            if(nums[i]+curSum<=mid){
+                curSum+=nums[i];
+            }
+            else{
+                subcount++;
+                curSum=nums[i];
+            }
+        }
+        return subcount;
+    }
+    int splitArray(vector<int>& nums, int m) {
+        int sum=0;
+        for(int i=0;i<nums.size();i++) sum+=nums[i];
+        int l=*max_element(nums.begin(),nums.end());
+        int h=sum;
+        int ans=-1;
+        while(l<=h){
+            int mid=l+(h-l)/2;
+            if(possibleSubarray(mid,nums)<=m){
+                ans=mid;
+                h=mid-1;
+            }
+            else l=mid+1;
+        }
+        return ans;
+    }
+
+
