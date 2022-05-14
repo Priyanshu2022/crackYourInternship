@@ -1464,3 +1464,225 @@ int possibleSubarray(int mid,vector<int> &nums){
     }
 
 
+
+// assume the first node is the last node
+// when we go to next node then we assume it as to be the last
+// and multiply the previous answer by 2
+int getDecimalValue(ListNode* head) {
+        int ans=0;
+        while(head){
+            ans*=2;
+            ans+=head->val;// head->val*2^0
+            head=head->next;
+        }
+        return ans;
+    }
+
+
+// node to be deleted is given
+// O(1) this will not work if node to be deleted is last
+
+
+ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        ListNode* a=headA;
+        ListNode* b=headB;
+        while(a!=b){
+            a= a==NULL?headB:a->next;
+            b= b==NULL?headA:b->next;
+        }
+        return a;
+    }
+
+
+bool hasCycle(ListNode *head) {
+        ListNode* slow=head;
+        ListNode* fast=head;
+        if(head==NULL || head->next==NULL) return false;
+        while(fast->next && fast->next->next){
+            if(slow->next==fast->next->next) return true;
+            slow=slow->next;
+            fast=fast->next->next;
+        }
+        return false;
+    }
+
+
+ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+        ListNode* temp=new ListNode(-1);
+        ListNode* ans=temp;
+
+        while(list1 and list2){
+            if((list1->val)>(list2->val)){
+                temp->next=list2;
+                list2=list2->next;  
+            }
+            else{
+                temp->next=list1;
+                list1=list1->next;
+            }
+            temp=temp->next;
+        }
+        while(list1){
+            temp->next=list1;
+            list1=list1->next;
+            temp=temp->next;
+        }
+        while(list2){
+            temp->next=list2;
+            list2=list2->next;
+            temp=temp->next;
+        }
+        return ans->next;
+    }  
+
+
+ListNode* middleNode(ListNode* head) {
+        ListNode* slow=head;
+        ListNode* fast=head;
+        while(fast!=NULL && fast->next!=NULL){
+            slow=slow->next;
+            fast = fast->next->next;
+        }
+        return slow;
+    }
+
+
+// find first number then 2nd number 
+// then multiply
+long long  multiplyTwoLists (Node* l1, Node* l2)
+{
+  long long mod=1e9+7;
+  long long num1=0;
+  long long num2=0;
+  Node* p1=l1;
+  Node* p2=l2;
+  while(p1){
+      num1=((num1*10)%mod +p1->data)%mod;
+      p1=p1->next;
+  }
+  while(p2){
+      num2=((num2*10)%mod +p2->data)%mod;
+      p2=p2->next;
+  }
+  return (num1*num2)%mod;
+}
+
+
+ListNode* reverseList(ListNode* head) {
+        ListNode* newHead=NULL;
+        while(head){
+            ListNode* temp=head->next;
+            head->next=newHead;
+            newHead=head;
+            head=temp;
+        }
+        return newHead;
+    }
+    bool isPalindrome(ListNode* head) {
+        ListNode* slow=head;
+        ListNode* fast=head;
+        while(fast->next && fast->next->next){
+            slow=slow->next;
+            fast=fast->next->next;
+        }
+        slow->next=reverseList(slow->next);
+        slow=slow->next;
+        while(slow){
+            if(slow->val!=head->val) return false;
+            slow=slow->next;
+            head=head->next;
+        }
+        return true;
+    }
+
+
+
+// while(cur) while(cur->next && cur->val == cur->next->val)
+ListNode* deleteDuplicates(ListNode* head) {
+        ListNode* cur=head;
+        while(cur){
+            while(cur->next && cur->val==cur->next->val){
+                cur->next=cur->next->next;
+            }
+            cur=cur->next;
+        }
+        return head;
+    }
+
+
+ListNode* removeElements(ListNode* head, int val) {
+        if(head==NULL) return head;
+        while(head && head->val==val){
+            head=head->next;
+        }
+        ListNode*cur=head;
+        while(cur){
+            while(cur->next && cur->next && cur->next->val==val){
+                cur->next=cur->next->next;
+            }
+            cur=cur->next;
+        }
+        return head;
+    }
+
+
+ListNode* reverseList(ListNode* head) {
+        ListNode* newHead=NULL;
+        while(head){
+            ListNode* temp=head->next;
+            head->next=newHead;
+            newHead=head;
+            head=temp;
+        }
+        return newHead;
+    }
+
+
+// there are two methods
+// first to count 0 , 1 and 2 then replace
+// second if you dont want to replace
+// create 6 nodes
+// and attach 0 , 1 , 2
+
+void insertAtTail(Node* &tail,Node* cur){ // pass by reference
+        tail->next=cur;
+        tail=cur; // pointing tail ahead
+    }
+    Node* segregate(Node *head) {
+        
+        Node* zeroHead=new Node(-1);
+        Node* zeroTail=zeroHead;
+        Node* oneHead=new Node(-1);
+        Node* oneTail=oneHead;
+        Node* twoHead=new Node(-1);
+        Node* twoTail=twoHead;
+        
+        Node* cur=head;
+        while(cur){
+            if(cur->data==0){
+                insertAtTail(zeroTail,cur);
+            }
+            else if(cur->data==1){
+                insertAtTail(oneTail,cur);
+            }
+            else if(cur->data==2){
+                insertAtTail(twoTail,cur);
+            }
+            cur=cur->next;
+        }
+        
+        if(oneHead->next==NULL){
+            zeroTail->next=twoHead->next;
+        }
+        else zeroTail->next=oneHead->next;
+        
+        oneTail->next=twoHead->next;
+        twoTail->next=NULL;
+        head=zeroHead->next;
+        delete zeroHead;
+        delete oneHead;
+        delete twoHead;
+        
+        return head;
+        
+    }
