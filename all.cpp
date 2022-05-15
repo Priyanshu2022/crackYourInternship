@@ -1686,3 +1686,364 @@ void insertAtTail(Node* &tail,Node* cur){ // pass by reference
         return head;
         
     }
+
+
+
+
+ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        ListNode* temp=new ListNode();
+        ListNode* dummy=temp;
+        int carry=0;
+        while((l1||l2) || carry){
+            int sum=0;
+            if(l1!=NULL){
+                sum+=l1->val;
+                l1=l1->next;
+            }
+            if(l2!=NULL){
+                sum+=l2->val;
+                l2=l2->next;
+            }
+            sum+=carry;
+            ListNode* node=new ListNode(sum%10);
+            carry=sum/10;
+            temp->next=node;
+            temp=temp->next;
+        }
+        return dummy->next;
+    }
+    
+
+
+// add two numbers 2
+// reverse then add
+
+
+// flatten the linked list
+Node* merge(Node* root,Node* next){
+        if(root==NULL) return next;
+        if(next==NULL) return root;
+        Node* ans=new Node(-1);
+        Node* temp=ans;
+        while(root!=NULL && next!=NULL){
+            if(root->data>next->data){
+                temp->bottom=next;
+                next=next->bottom;
+                temp=temp->bottom;
+            }
+            else{
+                temp->bottom=root;
+                root=root->bottom;
+                temp=temp->bottom;
+            }
+        }
+        if(root) temp->bottom=root;
+        else temp->bottom=next;
+        
+        return ans->bottom;
+    }
+Node *flatten(Node *root)
+{
+   if(root==NULL) return NULL;
+   return merge(root,flatten(root->next));
+}
+
+
+
+// flatten a multilevel doubly linked list
+// recursive function will return last node
+Node* flatten_rec(Node* head){
+        Node* cur=head;
+        Node* last=head;
+        while(cur){
+            Node* child=cur->child;
+            Node* next=cur->next;
+            if(child){
+                Node* tail=flatten_rec(cur->child);
+                tail->next=next;
+                if(next) next->prev=tail;
+                cur->next=child;
+                child->prev=cur;
+                cur->child=NULL;
+                cur=tail;
+            }
+            else cur=next;
+            if(cur) last=cur;
+        }
+        return last;
+    }
+    Node* flatten(Node* head) {
+        if(head) flatten_rec(head);
+        return head;
+    }
+
+
+
+
+// merge k sorted lists
+// compare class in priority queue
+// put all first element of lists in min heap
+// take and attach , push next of that
+class cmp{
+        public:
+        bool operator()(const ListNode* a,const ListNode* b){
+            return( a->val>b->val);
+        }
+};
+class Solution {
+public:
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        ListNode* dummy=new ListNode(0);
+        ListNode* temp=dummy;
+        priority_queue<ListNode*,vector<ListNode*>,cmp> pq;
+        for(int i=0;i<lists.size();i++) if(lists[i]!=NULL) pq.push(lists[i]);
+        while(!pq.empty()){
+            ListNode* least=pq.top();
+            pq.pop();
+            temp->next=least;
+            temp=temp->next;
+            if(least->next) pq.push(least->next);
+        }
+        return dummy->next;
+    }
+};
+
+
+
+
+// patition list
+// separate number less than x and greater than x
+// we make dummy nodes so we do not need to handle if head's position is changing
+ListNode* partition(ListNode* head, int x) {
+        ListNode* less=new ListNode(-1);
+        ListNode* curLess=less;
+        ListNode* greater=new ListNode(-1);
+        ListNode* curGreater=greater;
+        while(head){
+            if((head->val)<x){
+                curLess->next=head;
+                curLess=curLess->next;
+            }
+            else{
+                curGreater->next=head;
+                curGreater=curGreater->next;
+            }
+            head=head->next;
+        }
+        curGreater->next=NULL;
+        if(greater->next)
+        curLess->next=greater->next;
+        return less->next;;
+    }
+
+
+
+// remove all duplicates
+// only distincts node's should be left
+// make prev node , start with dummy
+ListNode* deleteDuplicates(ListNode* head) {
+        ListNode* dummy=new ListNode(0,head);
+        ListNode* prev=dummy;
+        while(head){
+            if(head->next && head->val==head->next->val){
+                while(head->next && head->val==head->next->val){
+                    head=head->next;
+                }
+                prev->next=head->next;
+            }
+            else prev=prev->next;
+            head=head->next;
+        }
+        return dummy->next;
+    }
+
+
+
+// remove nth node from end 
+ListNode* removeNthFromEnd(ListNode* head, int n) {
+        ListNode* start=new ListNode();
+        start->next=head;
+        ListNode* slow=start;
+        ListNode* fast=start;
+        for(int i=0;i<n;i++){
+            fast=fast->next;
+        }
+        while(fast->next){
+            fast=fast->next;
+            slow=slow->next;
+        }
+        slow->next=slow->next->next;
+        return start->next;
+    } 
+
+
+
+
+// reorder list 
+// L0 → Ln → L1 → Ln - 1 → L2 → Ln - 2 → …
+// find mid
+// break into two list (2nd one should be reversed)
+// then attach
+ListNode* reverseList(ListNode* head) {
+        ListNode* newHead=NULL;
+        while(head){
+            ListNode* temp=head->next;
+            head->next=newHead;
+            newHead=head;
+            head=temp;
+        }
+        return newHead;
+    }
+    void reorderList(ListNode* head) {
+        ListNode* slow=head;
+        ListNode* fast=head;
+        while(fast && fast->next){
+            slow=slow->next;
+            fast=fast->next->next;
+        }
+        ListNode* first=head;
+        ListNode* second=reverseList(slow->next);
+        slow->next=NULL;
+        while(second){
+            ListNode* temp1=first->next;
+            ListNode* temp2=second->next;
+            first->next=second;
+            second->next=temp1;
+            first=temp1;
+            second=temp2;
+        }
+    }
+
+
+
+// reverse from left to right
+// two methods one is the simple one
+// other one is this
+ListNode* reverseBetween(ListNode* head, int left, int right) {
+        if(head==NULL || left==right) return head;
+        ListNode* dummy = new ListNode(-1);
+        ListNode* prev = dummy;
+        dummy->next=head;
+        for(int i=0;i<left-1;i++){
+            prev=prev->next;
+        }
+        ListNode* tail=prev->next;
+        for(int i=0;i<right-left;i++){
+            ListNode* temp=prev->next;
+            prev->next=tail->next;
+            tail->next=prev->next->next;
+            prev->next->next=temp;
+        }
+        return dummy->next;
+    }
+
+
+// reverse nodes in k groups
+ListNode* reverseKGroup(ListNode* head, int k) {
+        if(head==NULL) return NULL;
+        
+        ListNode* temp=head;
+        for(int i=0;i<k;i++){
+            if(!temp) return head;
+            temp=temp->next;
+        }
+        
+        int count=0;
+        ListNode* next=NULL;
+        ListNode* cur=head;
+        ListNode* prev=NULL;
+        while(cur!=NULL && count<k){
+            next=cur->next;
+            cur->next=prev;
+            prev=cur;
+            cur=next;
+            count++;
+        }
+        if(cur!=NULL){
+            head->next=reverseKGroup(cur,k);
+        }
+        return prev;
+    }
+
+
+// segregate even and odd
+Node* divide(int N, Node *head){
+        Node* even=new Node(-1);
+        Node* evenP=even;
+        Node* odd=new Node(-1);
+        Node* oddP=odd;
+        while(head){
+            if((head->data)&1){
+                oddP->next=head;
+                oddP=head;
+            }
+            else{
+                evenP->next=head;
+                evenP=head;
+            }
+            head=head->next;
+        }
+        oddP->next=NULL;
+        if(odd->next){
+            evenP->next=odd->next;
+        }
+        return even->next;
+    }
+
+
+
+// find mid 
+// separate two list's
+// sort by recursion
+// merge and return 
+ListNode* findMid(ListNode* head){
+        ListNode* slow=head;
+        ListNode* fast=head;
+        while(fast->next && fast->next->next){
+            slow=slow->next;
+            fast=fast->next->next;
+        }
+        return slow;
+    }
+    ListNode* merge(ListNode* left,ListNode* right){
+        if(left==NULL) return right;
+        if(right==NULL) return left;
+        ListNode* dummy=new ListNode(-1);
+        ListNode* temp=dummy;
+        while(left && right){
+            if(left->val>right->val){
+                temp->next=right;
+                right=right->next;
+                temp=temp->next;
+            }
+            else{
+                temp->next=left;
+                left=left->next;
+                temp=temp->next;
+            }
+        }
+        while(left){
+            temp->next=left;
+            left=left->next;
+            temp=temp->next;
+        }
+        while(right){
+            temp->next=right;
+            right=right->next;
+            temp=temp->next;
+        }
+        return dummy->next;
+    }
+    ListNode* sortList(ListNode* head) {
+        if(head==NULL || head->next==NULL) return head;
+        ListNode* mid=findMid(head);
+        ListNode* left=head;
+        ListNode* right=mid->next;
+        mid->next=NULL;
+        left=sortList(left);
+        right=sortList(right);
+        return merge(left,right);
+    }
+
+
+
