@@ -2047,3 +2047,573 @@ ListNode* findMid(ListNode* head){
 
 
 
+
+
+
+// minimum distance of every cell from any 0
+// starting ans matrix with intmax and mark 0 element with zero
+// store inexes of all zeroes in queue
+// while q is not empty run the while loop
+// and check if it can be updated update and push
+
+vector<vector<int>> updateMatrix(vector<vector<int>>& mat) {
+        vector<vector<int>> ans(mat.size(),vector<int>(mat[0].size(),INT_MAX));
+        queue<pair<int,int>> q;
+        for(int i=0;i<mat.size();i++){
+            for(int j=0;j<mat[0].size();j++){
+                if(mat[i][j]==0){
+                    ans[i][j]=0;
+                    q.push({i,j});
+                }
+            }
+        }
+        while(!q.empty()){
+            int i=q.front().first;
+            int j=q.front().second;
+            if((i-1)>=0 && (ans[i][j]+1<ans[i-1][j])){
+                ans[i-1][j]=ans[i][j]+1;
+                q.push({i-1,j});
+            }
+            if((j-1)>=0 && (ans[i][j]+1<ans[i][j-1])){
+                ans[i][j-1]=ans[i][j]+1;
+                q.push({i,j-1});
+            }
+            if((i+1)<ans.size() && (ans[i][j]+1<ans[i+1][j])){
+                ans[i+1][j]=ans[i][j]+1;
+                q.push({i+1,j});
+            }
+            if((j+1)<ans[0].size() && (ans[i][j]+1<ans[i][j+1])){
+                ans[i][j+1]=ans[i][j]+1;
+                q.push({i,j+1});
+            }
+            q.pop();
+        }
+        return ans;
+    }
+    
+
+
+
+//Given two strings s and t, return true if they are equal 
+//when both are typed into empty text editors. 
+//'#' means a backspace character.
+bool backspaceCompare(string s, string t) {
+        stack<char> st1;
+        stack<char> st2;
+        for(int i=0;i<s.length();i++){
+            if(s[i]=='#'){
+                if(!st1.empty())
+                st1.pop();
+            }
+            else st1.push(s[i]);
+        }
+        for(int i=0;i<t.length();i++){
+            if(t[i]=='#'){
+                if(!st2.empty())
+                st2.pop();
+            }
+            else st2.push(t[i]);
+        }
+        if(st1.size()!=st2.size()) return false;
+        else{
+            while(st1.size() && st2.size()){
+                if(st1.top()==st2.top()){
+                    st1.pop();
+                    st2.pop();
+                }
+                else return false;
+            }
+        }
+        return true;
+    }
+
+
+
+// we are given circular path of petrol pumps
+// we need to start from any index of petrol pump and complete a circle
+// arr given has petrol and distance to the next petrol pump
+// we will take three variable start (will tell starting index)
+// balance current extra petrol
+// deficit is need (kami ) of petrol from start
+// struct petrolPump
+// {
+//     int petrol;
+//     int distance;
+// };
+int tour(petrolPump p[],int n)
+    {
+       int start=0;
+       int balance=0;
+       int deficit=0;
+       for(int i=0;i<n;i++){
+           balance+=p[i].petrol-p[i].distance;
+           if(balance<0){
+               deficit+=balance;
+               start=i+1;
+               balance=0;
+           }
+       }
+       if(balance+deficit>=0) return start;
+       else return -1;
+    }
+
+
+
+// number of days to wait after ith day to get warmer (greater ) temperature
+vector<int> dailyTemperatures(vector<int>& temperatures) {
+        stack<pair<int,int>> st;
+        int n=temperatures.size();
+        st.push({temperatures[n-1],n-1});
+        vector<int> ans(n);
+        ans[n-1]=0;
+        for(int i=n-2;i>=0;i--){
+            while(!st.empty() && st.top().first<=temperatures[i]) st.pop();
+            if(st.empty()) ans[i]=0;
+            else ans[i]=st.top().second-i;
+            st.push({temperatures[i],i});
+        }
+        return ans;
+    }
+
+
+
+// deque
+// push_back,push_front,pop_back,pop_front
+// front , back , at
+
+
+// evaluation of postfix(reverse polish notation)
+// string to number -> stoi()
+int evaluatePostfix(string exp)
+    {
+        stack<int> st;
+    for(int i=0;i<exp.length();i++){
+        if(exp[i]=='*'){
+            int first=st.top();
+            st.pop();
+            int second=st.top();
+            st.pop();
+            st.push(first*second);
+        }
+        else if(exp[i]=='/'){
+            int first=st.top();
+            st.pop();
+            int second=st.top();
+            st.pop();
+            st.push(second/first);
+        }
+        else if(exp[i]=='+'){
+            int first=st.top();
+            st.pop();
+            int second=st.top();
+            st.pop();
+            st.push(first+second);
+        }
+        else if(exp[i]=='-'){
+            int first=st.top();
+            st.pop();
+            int second=st.top();
+            st.pop();
+            st.push(second-first);
+        }
+        else st.push(exp[i]-'0');
+    }
+    return st.top();
+    }
+
+
+
+// two stack in single array
+// inititally top1=-1, top2=size
+// stack one will be filled from start 
+// stack two will be filled from end
+void twoStacks :: push1(int x)
+{
+    if(top2-top1>1){
+        top1++;
+        arr[top1]=x;
+    }
+}
+   
+//Function to push an integer into the stack2.
+void twoStacks ::push2(int x)
+{
+    if(top2-top1>1){
+        top2--;
+        arr[top2]=x;
+    }
+}
+   
+//Function to remove an element from top of the stack1.
+int twoStacks ::pop1()
+{
+    if(top1>=0){
+        int x=arr[top1];
+        top1--;
+        return x;
+    }
+    else return -1;
+}
+
+//Function to remove an element from top of the stack2.
+int twoStacks :: pop2()
+{
+    if(top2<size){
+        int x=arr[top2];
+        top2++;
+        return x;
+    }
+    else return -1;
+}
+
+
+
+// solve in leetcode
+// get (get a particular key) and put (put in cache) , if full remove the least recently used
+class LRUCache {
+  public:
+    class node {
+      public:
+        int key;
+      int val;
+      node * next;
+      node * prev;
+      node(int _key, int _val) {
+        key = _key;
+        val = _val;
+      }
+    };
+
+  node * head = new node(-1, -1);
+  node * tail = new node(-1, -1);
+
+  int cap;
+  unordered_map < int, node * > m;
+
+  LRUCache(int capacity) {
+    cap = capacity;
+    head -> next = tail;
+    tail -> prev = head;
+  }
+
+  void addnode(node * newnode) {
+    node * temp = head -> next;
+    newnode -> next = temp;
+    newnode -> prev = head;
+    head -> next = newnode;
+    temp -> prev = newnode;
+  }
+
+  void deletenode(node * delnode) {
+    node * delprev = delnode -> prev;
+    node * delnext = delnode -> next;
+    delprev -> next = delnext;
+    delnext -> prev = delprev;
+  }
+
+  int get(int key_) {
+    if (m.find(key_) != m.end()) {
+      node * resnode = m[key_];
+      int res = resnode -> val;
+      m.erase(key_);
+      deletenode(resnode);
+      addnode(resnode);
+      m[key_] = head -> next;
+      return res;
+    }
+
+    return -1;
+  }
+
+  void put(int key_, int value) {
+    if (m.find(key_) != m.end()) {
+      node * existingnode = m[key_];
+      m.erase(key_);
+      deletenode(existingnode);
+    }
+    if (m.size() == cap) {
+      m.erase(tail -> prev -> key);
+      deletenode(tail -> prev);
+    }
+
+    addnode(new node(key_, value));
+    m[key_] = head -> next;
+  }
+};
+
+
+
+vector<int> nextGreaterElement(vector<int>& nums1, vector<int>& nums2) {
+        unordered_map<int,int> mp;
+        stack<int> st;
+        for(int i=nums2.size()-1;i>=0;i--){
+            while(!st.empty() && st.top()<=nums2[i]){
+                st.pop();
+            }
+            if(!st.empty()) mp[nums2[i]]=st.top();
+            st.push(nums2[i]);
+        }
+        vector<int> ans;
+        for(int i=0;i<nums1.size();i++){
+            if(mp.find(nums1[i])==mp.end()) ans.push_back(-1);
+            else ans.push_back(mp[nums1[i]]);
+        }
+        return ans;
+    }
+
+
+
+
+// The span of the stock's price today is defined as the maximum number of consecutive days 
+// (starting from today and going backward) for which the stock price was less than or equal to today's price.
+// For example, if the price of a stock over the next 7 days were [100,80,60,70,60,75,85], then the stock 
+// spans would be [1,1,1,2,1,4,6]
+// we wil simply check if stack is empty means there is no next greater in left so i+1
+// else i-st.top().second (index of next greater  in  left)
+StockSpanner() {
+        
+    }
+    int i=0;
+    stack<pair<int,int>> st;
+    int next(int price) {
+        while(!st.empty() && st.top().first<=price) st.pop();
+        int ans;
+        if(st.empty()) ans=i+1;
+        else ans=i-st.top().second;
+        st.push({price,i});
+        i++;
+        return ans;
+    }
+
+
+// queue using stack 
+// take two stack
+// for making pop costlier
+// push in st1 
+// when want to pop
+// transfer elements to st2
+// its top will be the answer
+// then again transfer to st1
+class MyQueue {
+public:
+    stack<int> s1;
+    stack<int> s2;
+    MyQueue() {
+        
+    }
+    
+    void push(int x) {
+        s1.push(x);
+    }
+    
+    int pop() {
+        while(!s1.empty()){
+            s2.push(s1.top());
+            s1.pop();
+        }
+        int ans=s2.top();
+        s2.pop();
+        while(!s2.empty()){
+            s1.push(s2.top());
+            s2.pop();
+        }
+        return ans;
+    }
+    
+    int peek() {
+        while(!s1.empty()){
+            s2.push(s1.top());
+            s1.pop();
+        }
+        int ans=s2.top();
+        while(!s2.empty()){
+            s1.push(s2.top());
+            s2.pop();
+        }
+        return ans;
+    }
+    
+    bool empty() {
+        return s1.empty();
+    }
+};
+
+
+
+
+// if k duplicates are together remove them
+// stack of char ,int (count of that element)
+// st.top has same char increment it's count
+// if count==k st.pop()
+// now form the ans string 
+string removeDuplicates(string s, int k) {
+        stack<pair<char,int>> st;
+        for(int i=0;i<s.length();i++){
+            if(st.empty() || st.top().first!=s[i]){
+                st.push({s[i],1});
+            }
+            else{
+                auto prev=st.top();
+                st.pop();
+                st.push({s[i],prev.second+1});
+            }
+            if(st.top().second==k) st.pop();
+        }
+        string ans="";
+        while(!st.empty()){
+            auto cur=st.top();
+            st.pop();
+            while(cur.second--) ans+=cur.first;
+        }
+        reverse(ans.begin(),ans.end());
+        return ans;
+    }
+
+
+
+
+// rotten oranges 
+// 0 -> empty  , 1-> fresh orange , 2-> rotten
+// rotten , rottens in four directions
+// push all rotten in queue
+int orangesRotting(vector<vector<int>>& grid) {
+        int n=grid.size();
+        int m=grid[0].size();
+        int total=0,count=0,minutes=0;
+        queue<pair<int,int>> q;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(grid[i][j]!=0) total++;
+                if(grid[i][j]==2) q.push({i,j});
+            }
+        }
+        int dx[]={0,0,1,-1};
+        int dy[]={1,-1,0,0};
+        while(!q.empty()){
+            int size=q.size();
+            count+=size;
+            while(size--){
+                int x=q.front().first;
+                int y=q.front().second;
+                q.pop();
+                for(int i=0;i<4;i++){
+                    int cx=x+dx[i];
+                    int cy=y+dy[i];
+                    if(cx<0 || cx>=n || cy<0 || cy>=m || grid[cx][cy]!=1 ) continue;
+                    grid[cx][cy]=2;
+                    q.push({cx,cy});
+                }
+            }
+            if(!q.empty()) minutes++;
+        }
+        return (total==count)?minutes:-1;
+    }
+
+
+
+// stack using queue
+// we can do this using 2 queue and 1 queue
+// if we use 2 queue we can do it in two ways
+// making push(optimal) costlier or making pop costlier
+// making push costlier
+// take two queue , q1 and q2 , push in q2 then push all element of q1 in q2 then swap 
+// pop and top is simple
+// OR we can do this with only one queue as well
+// push in queue and for size -1 elements push the front again and pop
+class MyStack {
+public:
+    // queue<int> q1;
+    // queue<int> q2;
+    queue<int> q;
+    MyStack() {
+        
+    }
+    
+    void push(int x) {
+        // q2.push(x);
+        // while(!q1.empty()){
+        //     q2.push(q1.front());
+        //     q1.pop();
+        // }
+        // swap(q1,q2);
+        q.push(x);
+        for(int i=0;i<q.size()-1;i++){
+            q.push(q.front());
+            q.pop();
+        }
+    }
+    
+    int pop() {
+        // int ans=q1.front();
+        // q1.pop();
+        // return ans;
+        int ans=q.front();
+        q.pop();
+        return ans;
+    }
+    
+    int top() {
+        // return q1.front();
+        return q.front();
+    }
+    
+    bool empty() {
+        // return q1.empty();
+        return q.empty();
+    }
+};
+
+
+
+
+// sum of minimum of every subarray
+// iterate over every element and suppose it's minimum of a subarray
+// but question of how many subarray
+// we will calculate next smaller and prev smaller
+// then we will calculate elements in left of that element then elemenst in right of that element
+// total subarrays (left+1)*(right+1)
+// cost v[i]*tota subarryas with that element minimum
+// if have two equal element in the array ,then we will count subarrays twice
+// therefore mark either in next smaller or prev smaller greater than or equal to in heights[st.top()]>=heights[i]
+vector<int> nextSmaller(vector<int> & heights,int n){
+        stack<int> st;
+        st.push(-1);
+        vector<int> ans(n);
+        for(int i=n-1;i>=0;i--){
+            while(st.top()!=-1 && heights[st.top()]>heights[i]) st.pop();
+            ans[i]=st.top();
+            st.push(i);
+        }
+        return ans;
+    }
+    vector<int> prevSmaller(vector<int> & heights,int n){
+        stack<int> st;
+        st.push(-1);
+        vector<int> ans(n);
+        for(int i=0;i<n;i++){
+            while(st.top()!=-1 && heights[st.top()]>=heights[i]) st.pop();
+            ans[i]=st.top();
+            st.push(i);
+        }
+        return ans;
+    }
+    int sumSubarrayMins(vector<int>& arr) {
+        int mod=1e9+7;
+        int n=arr.size();
+        vector<int> v(n);
+        for(int i=0;i<n;i++) v[i]=arr[i];
+        vector<int> next=nextSmaller(v,n);
+        vector<int> prev=prevSmaller(v,n);
+        long long int ans=0;
+        for(int i=0;i<n;i++){
+            long long int right=next[i]-i-1; 
+            long long int left=i-prev[i]-1;
+            if(next[i]==-1) right=n-i-1;
+            if(prev[i]==-1) left=i;
+            ans=(ans%mod+v[i]*(left+1)*(right+1))%mod;
+        }
+        return ans;
+    }
+
+
+
