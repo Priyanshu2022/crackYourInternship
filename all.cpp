@@ -2660,3 +2660,458 @@ int celebrity(vector<vector<int> >& M, int n)
 
 
 
+
+
+// is tree balanced
+// every node should be balanced
+// pair will store bool and height
+pair<int,int> solve(TreeNode* root){
+        if(root==NULL){
+            return {true,0};
+        }
+        pair<int,int> left=solve(root->left);
+        pair<int,int> right=solve(root->right);
+        int dif=abs(left.second-right.second);
+        if(left.first && right.first && dif<=1 ){
+            return {true,max(left.second,right.second)+1};
+        }
+        else{
+            return {false,max(left.second,right.second)+1};
+        }
+    }
+    bool isBalanced(TreeNode* root) {
+        return solve(root).first;
+    }
+
+
+
+// all path from root to leaf
+void solve(TreeNode* root,vector<string> &ans,string s){
+        if(root->left==NULL && root->right==NULL){
+            ans.push_back(s);
+            return ;
+        }
+        if(root->left) solve(root->left,ans,s+"->"+to_string(root->left->val));
+        if(root->right) solve(root->right,ans,s+"->"+to_string(root->right->val));
+    }
+    vector<string> binaryTreePaths(TreeNode* root) {
+        vector<string> ans;
+        string s=to_string(root->val);
+        solve(root,ans,s);
+        return ans;
+    }
+
+
+
+// sorted array to height balanced binary search tree
+// take mid of the array make it root , then call another function 
+TreeNode* solve(int start ,int end,vector<int> &nums){
+        if(start>end) return NULL;
+        int mid=(start+end)/2;
+        TreeNode* root=new TreeNode(nums[mid]);
+        root->left=solve(start,mid-1,nums);
+        root->right=solve(mid+1,end,nums);
+        return root;
+    }
+    TreeNode* sortedArrayToBST(vector<int>& nums) {
+        int mid=(nums.size()-1)/2;
+        TreeNode* root=new TreeNode(nums[mid]);
+        root->left=solve(0,mid-1,nums);
+        root->right=solve(mid+1,nums.size()-1,nums);
+        return root;
+    }
+
+
+
+// diameter of the binary tree first element of the pair will store the dia and the other will store height
+pair<int,int> diameterFast(Node* root) {
+        //base case
+        if(root == NULL) {
+            pair<int,int> p = make_pair(0,0);
+            return p;
+        }
+        
+        pair<int,int> left = diameterFast(root->left);
+        pair<int,int> right = diameterFast(root->right);
+        
+        int op1 = left.first;
+        int op2 = right.first;
+        int op3 = left.second + right.second + 1;
+        
+        pair<int,int> ans;
+        ans.first = max(op1, max(op2, op3));;
+        ans.second = max(left.second , right.second) + 1;
+
+        return ans;
+    }
+    int diameter(Node* root) {
+    
+        return diameterFast(root).first;
+        
+    }
+
+
+
+TreeNode* invertTree(TreeNode* root) {
+        if(root==NULL) return NULL;
+        swap(root->left,root->right);
+        invertTree(root->left);
+        invertTree(root->right);
+        return root;
+    }
+
+
+// height of a binary tree
+int maxDepth(TreeNode* root) {
+        if(root==NULL) return 0;
+        return 1+max(maxDepth(root->left),maxDepth(root->right));
+    }
+
+
+// merge to binary tree
+// if one node is null and the other is not null make the new trees node as the not null one
+// if both are not null , sum of both the node as the new node
+TreeNode* mergeTrees(TreeNode* root1, TreeNode* root2) {
+        if(root1==NULL && root2==NULL) return NULL;
+        if(root1==NULL && root2!=NULL) return root2;
+        if(root1!=NULL && root2==NULL) return root1;
+        TreeNode* root=new TreeNode(root1->val+root2->val);
+        root->left=mergeTrees(root1->left,root2->left);
+        root->right=mergeTrees(root1->right,root2->right);
+        return root;
+    }
+
+
+// root to leaf with given target sum
+bool hasPathSum(TreeNode* root, int targetSum) {
+        if(root==NULL) return false;
+        if(root->val==targetSum && root->left==NULL && root->right==NULL) return true;
+        return hasPathSum(root->left,targetSum-root->val)||hasPathSum(root->right,targetSum-root->val);
+    }
+
+
+// find the sum of nodes in range low and high
+// the given tree is bst
+// so we can further optimise it
+// if low > root->val then in range nodes can only be in right part
+// if high < root->val then in range nodes can only be in left part
+int rangeSumBST(TreeNode* root, int low, int high) {
+        if(root==NULL) return 0;
+        return rangeSumBST(root->left,low,high)+rangeSumBST(root->right,low,high)+
+        ((root->val>=low && root->val<=high)?root->val:0);
+    }
+
+
+// is the tree same
+// traverse together
+bool isSameTree(TreeNode* p, TreeNode* q) {
+        if(p==NULL || q==NULL) return p==NULL&&q==NULL;
+        // if(p==NULL && q==NULL) return true;
+        // if(p==NULL && q!=NULL) return false;
+        // if(p!=NULL && q==NULL) return false;
+        bool left=isSameTree(p->left,q->left);
+        bool right=isSameTree(p->right,q->right);
+        bool val= p->val==q->val;
+        if(left && right && val) return true;
+        else return false;
+    }
+
+
+// check if subRoot is a subtree of root
+// time complexity=O(n*m) , space =O(min(m,n))
+// for every node of root we will traverse subRoot , and match them 
+bool isSameTree(TreeNode* root,TreeNode* subRoot){
+        // if one of them is null , return true is both of them are null else false
+        if(root==NULL || subRoot==NULL) return (root==NULL&&subRoot==NULL);
+        if(root->val!=subRoot->val) return false;
+        else return (isSameTree(root->left,subRoot->left)&&isSameTree(root->right,subRoot->right));
+    }
+    bool isSubtree(TreeNode* root, TreeNode* subRoot) {
+        if(root==NULL) return false;
+        if(isSameTree(root,subRoot)) return true;
+        else return (isSubtree(root->left,subRoot) || isSubtree(root->right,subRoot));
+    }
+
+
+// return true if root's data is sum of its left and right subtree
+// first element of pair wil store other will store sum
+// here we will have to handle another case of leaf node, as we have to ignore the leaf node 
+pair<int,int> solve(Node* root){
+        if(root==NULL){
+            return {true,0};
+        }
+        if(root->left==NULL && root->right==NULL){
+            return {true,root->data};
+        }
+        pair<int,int> left=solve(root->left);
+        pair<int,int> right=solve(root->right);
+        int sum=left.second+right.second;
+        if(left.first && right.first && sum==root->data) return {true,sum+root->data};
+        else return {false,sum+root->data};
+    }
+    bool isSumTree(Node* root)
+    {
+         return solve(root).first;
+    }
+
+
+ // symmetric tree
+ bool solve(TreeNode* first,TreeNode* second){
+        if(first==NULL && second==NULL ) return true;
+        if(first && second && first->val==second->val)
+        return solve(first->left,second->right)&&solve(first->right,second->left);
+        return false;
+    }
+public:
+    bool isSymmetric(TreeNode* root) {
+        return solve(root,root);
+    }
+
+
+// store in queue
+vector<vector<int>> levelOrder(TreeNode* root) {
+        vector<vector<int>> ans;
+        if(root==NULL){
+            return ans;
+        }
+        queue<TreeNode*> q;
+        q.push(root);
+        while(!q.empty()){
+            int size=q.size();
+            vector<int> temp;
+            for(int i=0;i<size;i++){
+                TreeNode* it=q.front();
+                q.pop();
+                if(it->left){
+                    q.push(it->left);
+                }
+                if(it->right){
+                    q.push(it->right);
+                }
+                temp.push_back(it->val);
+            }
+            ans.push_back(temp);
+        }
+        return ans;
+    }
+
+
+
+vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
+        vector<vector<int>> ans;
+        if(root==NULL) return ans;
+        queue<TreeNode*> q;
+        q.push(root);
+        bool f=1;
+        while(!q.empty()){
+            int size=q.size();
+            vector<int> temp(size);
+            for(int i=0;i<size;i++){
+                int index=(f)?i:(size-i-1);
+                TreeNode* cur=q.front();
+                q.pop();
+                temp[index]=cur->val;
+                if(cur->left){
+                    q.push(cur->left);
+                }
+                if(cur->right){
+                    q.push(cur->right);
+                }
+            }
+            ans.push_back(temp);
+            f=!f;
+        }
+        return ans;
+    }
+
+
+
+// print left node's (except last ) , print leaf nodes , then right nodes (except last)
+void traverseLeft(Node* root, vector<int> &ans){
+        if(root==NULL || (root->left==NULL && root->right==NULL)) return;
+        ans.push_back(root->data);
+        if(root->left){
+            traverseLeft(root->left,ans);
+        }
+        else traverseLeft(root->right,ans);
+    }
+    void traverseRight(Node* root,vector<int> &ans){
+        if(root==NULL || (root->left==NULL && root->right==NULL)) return ;
+        if(root->right){
+            traverseRight(root->right,ans);
+        }
+        else traverseRight(root->left,ans);
+        ans.push_back(root->data);
+    }
+    void traverseLeaf(Node* root,vector<int> &ans){
+        if(root==NULL) return ;
+        if(root->left==NULL && root->right==NULL) ans.push_back(root->data);
+        traverseLeaf(root->left,ans);
+        traverseLeaf(root->right,ans);
+    }
+    vector <int> boundary(Node *root)
+    {
+        vector<int> ans;
+        ans.push_back(root->data);
+        traverseLeft(root->left,ans);
+        
+        // if pass with the root and only one root present , then ans will have two roots
+        traverseLeaf(root->left,ans);
+        traverseLeaf(root->right,ans);
+
+        traverseRight(root->right,ans);
+        
+        return ans;
+    }
+
+
+
+// map of <hd , map<level,values>>
+// queue of node and hd,level
+vector<int> verticalOrder(Node *root)
+    {
+        // hd       level  node's value 
+        map<int,map<int,vector<int>>> mp;
+        vector<int> ans;
+        if(root==NULL) return ans;
+        
+        //        node        hd  level
+        queue<pair<Node*,pair<int,int>>> q;
+        q.push({root,{0,0}});
+        while(!q.empty()){
+            auto temp=q.front();
+            q.pop();
+            int hd=temp.second.first;
+            int lvl=temp.second.second;
+            mp[hd][lvl].push_back(temp.first->data);
+            if(temp.first->left) q.push({temp.first->left,{hd-1,lvl+1}});
+            if(temp.first->right) q.push({temp.first->right,{hd+1,lvl+1}});
+        }
+        for(auto i:mp){
+            for(auto j:i.second){
+                for(auto cur:j.second){
+                    ans.push_back(cur);
+                }
+            }
+        }
+        return ans;
+    }
+
+
+// make map of int ,int and update only when new hd comes
+vector<int> topView(Node *root)
+    {
+        vector<int> ans; 
+        if(root == NULL) return ans; 
+        //  hd  root'data
+        map<int,int> mpp; 
+        queue<pair<Node*, int>> q; 
+        q.push({root, 0}); 
+        while(!q.empty()) {
+            auto it = q.front(); 
+            q.pop();  
+            Node* node = it.first; 
+            int line = it.second; 
+            if(mpp.find(line) == mpp.end())
+            mpp[line] = node->data; 
+            if(node->left != NULL) {
+                q.push({node->left, line-1}); 
+            }
+            if(node->right != NULL) {
+                q.push({node->right, line + 1}); 
+            }
+            
+        }
+        
+        for(auto it : mpp) {
+            ans.push_back(it.second); 
+        }
+        return ans;
+    }
+
+// update everytime you see a new hd
+vector <int> bottomView(Node *root) {
+         vector<int> ans; 
+        if(root == NULL) return ans; 
+        map<int,int> mpp; 
+        queue<pair<Node*, int>> q; 
+        q.push({root, 0}); 
+        while(!q.empty()) {
+            auto it = q.front(); 
+            q.pop();  
+            Node* node = it.first; 
+            int line = it.second; 
+            mpp[line] = node->data; 
+            if(node->left != NULL) {
+                q.push({node->left, line-1}); 
+            }
+            if(node->right != NULL) {
+                q.push({node->right, line + 1}); 
+            }
+            
+        }
+        
+        for(auto it : mpp) {
+            ans.push_back(it.second); 
+        }
+        return ans;
+    }
+
+// left view , maintain level and compare with vector of ans .size
+void solve(Node * root,vector<int> &ans,int level){
+    if(root==NULL ) return;
+    if(level==ans.size()){
+        ans.push_back(root->data);
+    }
+    solve(root->left,ans,level+1);
+    solve(root->right,ans,level+1);
+}
+vector<int> leftView(Node *root)
+{
+   vector<int> ans;
+   solve(root,ans,0);
+   return ans;
+}
+
+// right view, go to the right first
+void solve(Node * root,vector<int> &ans,int level){
+        if(!root) return;
+        if(ans.size()==level){
+            ans.push_back(root->data);
+        }
+        solve(root->right,ans,level+1);
+        solve(root->left,ans,level+1);
+
+    }
+    
+    vector<int> rightView(Node *root)
+    {
+       vector<int> ans;
+       solve(root,ans,0);
+       return ans;
+    }
+
+
+// diagonal traversal
+// push root in queue
+// in while loop
+// move to right of front node
+// push if left exist 
+// put in ans then move right
+vector<int> diagonal(Node *root)
+{
+   vector<int> ans;
+   if(root==NULL) return ans;
+   queue<Node*> q;
+   q.push(root);
+   while(!q.empty()){
+       Node* temp=q.front();
+       q.pop();
+       while(temp){
+           if(temp->left) q.push(temp->left);
+           ans.push_back(temp->data);
+           temp=temp->right;
+       }
+   }
+   return ans;
+}
