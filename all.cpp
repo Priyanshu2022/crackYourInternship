@@ -3115,3 +3115,419 @@ vector<int> diagonal(Node *root)
    }
    return ans;
 }
+
+
+
+
+
+// first create parent mapping
+// then maintain a visited map
+// and make a queue
+void createParentMapping(TreeNode* root,unordered_map<TreeNode*,TreeNode*> &mp){
+        queue<TreeNode*> q;
+        q.push(root);
+        while(!q.empty()){
+            TreeNode* temp=q.front();
+            q.pop();
+            if(temp->left){
+                mp[temp->left]=temp;
+                q.push(temp->left);
+            }
+            if(temp->right){
+                mp[temp->right]=temp;
+                q.push(temp->right);
+            }
+        }
+    }
+    vector<int> distanceK(TreeNode* root, TreeNode* target, int k) {
+        unordered_map<TreeNode*,TreeNode*> mp;
+        unordered_map<TreeNode*,bool> vis;
+        createParentMapping(root,mp);
+        queue<TreeNode*> q;
+        q.push(target);
+        vis[target]=true;
+        int curDistance=0;
+        while(!q.empty()){
+            if(curDistance==k) break;
+            curDistance++;
+            int size=q.size();
+            for(int i=0;i<size;i++){
+                TreeNode* temp=q.front();
+                q.pop();
+                if(temp->left && !vis[temp->left]){
+                    vis[temp->left]=1;
+                    q.push(temp->left);
+                }
+                if(temp->right && !vis[temp->right]){
+                    vis[temp->right]=1;
+                    q.push(temp->right);
+                }
+                if(mp[temp] && !vis[mp[temp]]){
+                    vis[mp[temp]]=1;
+                    q.push(mp[temp]);
+                }
+            }
+        }
+        vector<int> ans;
+        while(!q.empty()){
+            ans.push_back(q.front()->val);
+            q.pop();
+        }
+        return ans;
+    }
+
+
+
+
+// given a binary tree , determine if it is height balanced
+pair<int,int> solve(TreeNode* root){
+        if(root==NULL){
+            return {true,0};
+        }
+        pair<int,int> left=solve(root->left);
+        pair<int,int> right=solve(root->right);
+        int dif=abs(left.second-right.second);
+        if(left.first && right.first && dif<=1 ){
+            return {true,max(left.second,right.second)+1};
+        }
+        else{
+            return {false,max(left.second,right.second)+1};
+        }
+    }
+    bool isBalanced(TreeNode* root) {
+        return solve(root).first;
+    }
+
+
+
+// BST iterator
+// next (next inorder)
+// hasNext
+
+// push all left nodes in push all function
+// if want next give the top and push all it's right(cur->right)
+class BSTIterator {
+    stack <TreeNode*> st;
+public:
+    void pushAll(TreeNode* root){
+        while(root!=NULL){
+            st.push(root);
+            root=root->left;
+        }
+    }
+    BSTIterator(TreeNode* root) {
+        pushAll(root);
+    }
+    
+    int next() {
+        TreeNode* cur=st.top();
+        st.pop();
+        pushAll(cur->right);
+        return cur->val;
+    }
+    
+    bool hasNext() {
+        return !st.empty();
+    }
+};
+
+
+
+
+// check if bst had dead end (no further nodes can be added)
+// if min and max becomes true , return true (means there is a dead end)
+bool solve(Node* root,int min,int max)
+{
+    if(root==NULL ) return false;
+    if(min==max) return true;
+    return solve(root->left,min,root->data-1) || solve(root->right,root->data+1,max);
+}
+bool isDeadEnd(Node *root)
+{
+    //Your code here
+    return solve(root,1,INT_MAX);
+}
+
+
+
+// kth ancestor of a node
+// root's data is node return root
+// call in left and right
+// if both null return null
+// if one of them is not null
+// decrement k , k==0 return root else return the one which is not null
+Node* solve(Node* root,int &k ,int node){
+    if(root==NULL) return NULL;
+    if(root->data==node) return root;
+    Node* left= solve(root->left,k,node);
+    Node* right= solve(root->right,k,node);
+    if(left==NULL && right!=NULL){
+        k--;
+        if(k==0) return root;
+        else return right;
+    }
+    if(right==NULL && left!=NULL){
+        k--;
+        if(k==0) return root;
+        else return left;
+    }
+    return NULL;
+}
+int kthAncestor(Node *root, int k, int node)
+{
+    Node* ans=solve(root,k,node);
+    if(ans==NULL || ans->data==node) return -1;
+    else
+    return ans->data;
+}
+
+
+
+// if root is one of p and q return root
+// call for left and right
+// if getting answer from both the sides return root
+TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if(root==NULL) return NULL;
+        if(root==p || root==q) return root;
+        TreeNode* left=lowestCommonAncestor(root->left,p,q);
+        TreeNode* right=lowestCommonAncestor(root->right,p,q);
+        if(left!=NULL && right!=NULL) return root;
+        else if(left!=NULL && right==NULL) return left;
+        else if(left==NULL && right!=NULL) return right;
+        else return NULL;
+    }
+
+
+
+
+// lca of bst
+// if root ==null return null
+// if both nodes on right go to the right , if both nodes at left , move left
+// else return root
+TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if(root==NULL) return NULL;
+        if(root->val<p->val && root->val<q->val){
+            return lowestCommonAncestor(root->right,p,q);
+        }
+        else if(root->val>p->val && root->val>q->val){
+            return lowestCommonAncestor(root->left,p,q);
+        }
+        else return root;
+    }
+
+
+
+vector<vector<int>> levelOrder(TreeNode* root) {
+        vector<vector<int>> ans;
+        if(root==NULL){
+            return ans;
+        }
+        queue<TreeNode*> q;
+        q.push(root);
+        while(!q.empty()){
+            int size=q.size();
+            vector<int> temp;
+            for(int i=0;i<size;i++){
+                TreeNode* it=q.front();
+                q.pop();
+                if(it->left){
+                    q.push(it->left);
+                }
+                if(it->right){
+                    q.push(it->right);
+                }
+                temp.push_back(it->val);
+            }
+            ans.push_back(temp);
+        }
+        return ans;
+    }
+
+
+
+// maximum sum of non adjacent elements
+// at every node there are two options we can take it or leave it
+pair<int,int> solve(Node* root){
+        if(root==NULL){
+            pair<int,int> temp={0,0};
+            return temp;
+        }
+        pair<int,int> left=solve(root->left);
+        pair<int,int> right=solve(root->right);
+        pair<int,int> ans;
+        ans.first=root->data+left.second+right.second;// including first, so taking excluding of left and right
+        ans.second=max(left.first,left.second)+max(right.first,right.second);
+        return ans;
+    }
+    int getMaxSum(Node *root) 
+    {
+        // max sum when includeing current , excluding
+        pair<int,int> ans=solve(root);
+        return max(ans.first,ans.second);
+    }
+
+
+
+// maintain a path and count
+void solve(TreeNode* root,int k,vector<int> &path,int &count){
+        if(root==NULL) return ;
+        path.push_back(root->val);
+        solve(root->left,k,path,count);
+        solve(root->right,k,path,count);
+        long long int sum=0;
+        for(int i=path.size()-1;i>=0;i--){
+            sum+=path[i];
+            if(sum==k) count++;
+        }
+        path.pop_back();
+    }
+    int pathSum(TreeNode* root, int targetSum) {
+        vector<int> path;
+        int count=0;
+        solve(root,targetSum,path,count);
+        return count;
+    }
+
+
+
+
+// Predecessor and Successor 
+void findPreSuc(Node* root, Node*& pre, Node*& suc, int key)
+{
+    Node* temp=root;
+    while(temp){
+        if(temp->key>key){
+            suc=temp;
+            temp=temp->left;
+        }
+        else temp=temp->right;
+    }
+    temp=root;
+    while(temp){
+        if(temp->key<key){
+            pre=temp;
+            temp=temp->right;
+        }
+        else temp=temp->left;
+    }
+}
+
+
+
+// maintain a level
+void solve(TreeNode* root,vector<int> &ans,int level){
+        if(root==NULL) return ;
+        if(ans.size()==level) ans.push_back(root->val);
+        solve(root->right,ans,level+1);
+        solve(root->left,ans,level+1);
+    }
+    vector<int> rightSideView(TreeNode* root) {
+        vector<int> ans;
+        solve(root,ans,0);
+        return ans;
+    }
+
+
+// return sum of left leaves(left nodes , which are on left of another node)
+int sumOfLeftLeaves(TreeNode* root) {
+        if(root==NULL) return 0;
+        if(root->left && root->left->left==NULL && root->left->right==NULL){
+            return root->left->val+sumOfLeftLeaves(root->right);
+        }
+        return sumOfLeftLeaves(root->left)+sumOfLeftLeaves(root->right);
+    }
+
+
+
+// sum of nodes of longest path
+// maintain maxsum, sum, len,maslen
+void solve(Node* root,int sum,int &maxsum,int len,int &maxlen){
+        if(root==NULL){
+            if(len>maxlen){
+                maxsum=sum;
+                maxlen=len;
+            }
+            else if(len==maxlen){
+                maxsum=max(maxsum,sum);
+            }
+            return ;
+        }
+        sum+=root->data;
+        solve(root->left,sum,maxsum,len+1,maxlen);
+        solve(root->right,sum,maxsum,len+1,maxlen);
+    }
+    int sumOfLongRootToLeafPath(Node *root)
+    {
+        int sum=0;
+        int maxsum=0;
+        int len=0;
+        int maxlen=0;
+        solve(root,sum,maxsum,len,maxlen);
+        return maxsum;
+    }
+
+
+
+
+Node* solve(int &index,int in[],int post[],int inorderStart,int inorderEnd,int n,map<int,int> &nodeToIndex){
+        if(index<0 || inorderStart>inorderEnd){
+            return NULL;
+        }
+        int element=post[index];
+        Node* root=new Node(element);
+        int position=nodeToIndex[element];
+        index--;
+        // calling right recurstion first as index of postorder points there 
+        root->right=solve(index,in,post,position+1,inorderEnd,n,nodeToIndex);
+        root->left=solve(index,in,post,inorderStart,position-1,n,nodeToIndex);
+        return root;
+    }
+Node *buildTree(int in[], int post[], int n) {
+        map<int,int> nodeToIndex;
+        for(int i=0;i<n;i++){
+            nodeToIndex[in[i]]=i;
+        }
+        int postOrderStart=n-1;
+        return solve(postOrderStart,in,post,0,n-1,n,nodeToIndex);
+}
+
+
+// we want to increment index and want to reflect that in every call 
+    // tc after using map => nlong + n =nlogn
+    // sc = n of map , stack space = 
+    Node* solve(int &index,int in[],int pre[],int inorderStart,int inorderEnd,int n,map<int,int> &nodeToIndex){
+        if(index>=n || inorderStart>inorderEnd){
+            return NULL;
+        }
+        int element=pre[index];
+        Node* root=new Node(element);
+        int position=nodeToIndex[element];
+        index++;
+        root->left=solve(index,in,pre,inorderStart,position-1,n,nodeToIndex);
+        root->right=solve(index,in,pre,position+1,inorderEnd,n,nodeToIndex);
+        return root;
+    }
+    Node* buildTree(int in[],int pre[], int n)
+    {
+        // to get inorder index at O(1)
+        map<int,int> nodeToIndex;
+        for(int i=0;i<n;i++){
+            nodeToIndex[in[i]]=i;
+        }
+        int preOrderStart=0;
+        return solve(preOrderStart,in,pre,0,n-1,n,nodeToIndex);
+    }
+
+
+// validate a bst
+bool solve(TreeNode* root,long mini,long maxi){
+        if(root==NULL) return true;
+        if(root->val <=mini || root->val >=maxi){
+            return false;
+        }
+        return solve(root->left,mini,root->val)&&solve(root->right,root->val,maxi);
+    }
+public:
+    bool isValidBST(TreeNode* root) {
+        return solve(root,LONG_MIN,LONG_MAX);
+    }
