@@ -3531,3 +3531,341 @@ public:
     bool isValidBST(TreeNode* root) {
         return solve(root,LONG_MIN,LONG_MAX);
     }
+
+
+
+
+TreeNode* solve(vector<int> &pre,map<int,int> &postOrderMap,int &preIndex,int postStart,int postEnd){
+        if(postStart>postEnd) return NULL;
+        TreeNode* node =new TreeNode(pre[preIndex]);
+        preIndex++;
+        if(postStart==postEnd) return node;
+        int postIndex=postOrderMap[pre[preIndex]];
+        node->left=solve(pre,postOrderMap,preIndex,postStart,postIndex);
+        node->right=solve(pre,postOrderMap,preIndex,postIndex+1,postEnd-1);
+        return node;
+    }
+    TreeNode* constructFromPrePost(vector<int>& pre, vector<int>& post) {
+        map<int,int> postOrderMap;
+        for(int i=0;i<post.size();i++) postOrderMap[post[i]]=i;
+        int preIndex=0;
+        return solve(pre,postOrderMap,preIndex,0,post.size()-1);
+    }
+
+
+
+// no need of lower bound
+// maintain a upper bound
+// if going to the left current nodes's value becomes the upper bound
+// else if going to the right upperBound of currentnode become's the upperbound
+TreeNode* build(vector<int> &preorder,int &i,int bound){
+        if(i==preorder.size() || preorder[i]>bound) return NULL;
+        TreeNode* root=new TreeNode(preorder[i]);
+        i++;
+        root->left=build(preorder,i,root->val);
+        root->right=build(preorder,i,bound);
+        return root;
+    }
+    TreeNode* bstFromPreorder(vector<int>& preorder) {
+        int i=0;// for preorder traversal(first node is root)
+        return build(preorder,i,INT_MAX);
+    }
+
+
+
+
+// count bst nodes that lie int he given range
+int getCount(Node *root, int l, int h)
+    {
+         if(root==NULL) return 0;
+         if(root->data>=l && root->data<=h){
+             return 1+getCount(root->left,l,h)+getCount(root->right,l,h);
+         }
+         else if(root->data<l && root->data<h){
+             return getCount(root->right,l,h);
+         }
+         else if(root->data>l && root->data>h){
+             return getCount(root->left,l,h);
+         }
+    }
+
+
+
+// if cur's left exists
+    // cur ka predecessor nikalo (left jaake right jaate jao)
+    // then uske right ko cur ke right se connect karo 
+    // and mark cur's right as it's left
+    // and mark left as null
+    // after that move cur to right
+    void flatten(TreeNode* root) {
+        TreeNode* cur=root;
+        while(cur){
+            if(cur->left){
+                TreeNode* pred=cur->left;
+                while(pred->right){
+                    pred=pred->right;
+                }
+                pred->right=cur->right;
+                cur->right=cur->left;
+                cur->left=NULL;
+            }
+            cur=cur->right;
+        }
+    }
+
+
+
+// kth smallest element in bst
+// maintain a count cur
+// in inorder we get the sorted order ( access and check between left and right calls)
+// call for left and if does not give -1 return left;
+int solve(TreeNode* root,int k,int &cur){
+        if(root==NULL) return -1;
+        int left=solve(root->left,k,cur);
+        if(left!=-1) return left;
+        if(cur==k-1) return root->val;
+        cur++;
+        int right=solve(root->right,k,cur);
+        return right;
+    }
+    int kthSmallest(TreeNode* root, int k) {
+        int cur=0;
+        return solve(root,k,cur);
+    }
+
+
+
+// maximum width binary tree
+// find maximum width between any two existing nodes (in a level)
+// if we mark the index , then the task is to subtract first and last and add 1
+// children of i -> 2*i+1,2*i+2
+// queue will be of pair of node , index
+// subtracting the minimum of every level (first element) with index , to store in int
+int widthOfBinaryTree(TreeNode* root) {
+        if(!root) return 0;
+        int ans=0;
+        queue<pair<TreeNode*,long long int>> q;
+        q.push({root,0});
+        while(!q.empty()){
+            int size=q.size();
+            long long int mini=q.front().second;
+             int first,last;
+            for(int i=0;i<size;i++){
+                long long int cur_index=q.front().second-mini;
+                TreeNode* node=q.front().first;
+                q.pop();
+                if(i==0) first=cur_index;
+                if(i==size-1) last=cur_index;
+                if(node->left){
+                    q.push({node->left,cur_index*2+1});
+                }
+                if(node->right){
+                    q.push({node->right,cur_index*2+2});
+                }
+            }
+            ans=max(ans,last-first+1);
+        }
+        return ans;
+    }
+
+
+
+// minimum distance between any two nodes of a binary tree
+// find the lca first, then find distance of the two nodes from lca
+Node* lowestCommonAncestor(Node* root, int p, int q) {
+        if(root==NULL) return NULL;
+        if(root->data==p || root->data==q) return root;
+        Node* left=lowestCommonAncestor(root->left,p,q);
+        Node* right=lowestCommonAncestor(root->right,p,q);
+        if(left!=NULL && right!=NULL) return root;
+        else if(left!=NULL && right==NULL) return left;
+        else if(left==NULL && right!=NULL) return right;
+        else return NULL;
+    }
+    int solve(Node* root,int k,int dist){
+        if(root==NULL) return -1;
+        if(root->data==k) return dist;
+        int left=solve(root->left,k,dist+1);
+        if(left!=-1) return left;
+        return solve(root->right,k,dist+1);
+    }
+    int findDist(Node* root, int a, int b) {
+        Node* lca=lowestCommonAncestor(root,a,b);
+        int distA=solve(lca,a,0);// 0 here is the current distance trvelled
+        int distB=solve(lca,b,0);
+        return distA+distB;
+    }
+
+
+
+// morrist traversal
+// left check karo null hai kya
+// hai toh push karke right
+// else
+// left jaake link banado sabki
+// fir jab linke khudko point kare toh cur ko push kardo
+vector < int > inorderTraversal(node * root) {
+  vector < int > inorder;
+
+  node * cur = root;
+  while (cur != NULL) {
+    if (cur -> left == NULL) {
+      inorder.push_back(cur -> data);
+      cur = cur -> right;
+    } 
+    else {
+      node * prev = cur -> left;
+      while (prev -> right != NULL && prev -> right != cur) {
+        prev = prev -> right;
+      }
+
+      if (prev -> right == NULL) {
+        prev -> right = cur;
+        cur = cur -> left;
+      } else {
+        prev -> right = NULL;
+        inorder.push_back(cur -> data);
+        cur = cur -> right;
+      }
+    }
+  }
+  return inorder;
+}
+
+vector < int > preorderTraversal(node * root) {
+  vector < int > inorder;
+
+  node * cur = root;
+  while (cur != NULL) {
+    if (cur -> left == NULL) {
+      inorder.push_back(cur -> data);
+      cur = cur -> right;
+    } else {
+      node * prev = cur -> left;
+      while (prev -> right != NULL && prev -> right != cur) {
+        prev = prev -> right;
+      }
+
+      if (prev -> right == NULL) {
+        prev -> right = cur;
+        inorder.push_back(cur -> data);
+        cur = cur -> left;
+      } else {
+        prev -> right = NULL;
+        cur = cur -> right;
+      }
+    }
+  }
+  return inorder;
+}
+
+
+
+// do a level order traversal 
+// for each node for size-1 elements make it point to the next
+// other  wise to null
+Node* connect(Node* root) {
+        if(root==NULL) return NULL;
+        queue<Node*> q;
+        q.push(root);
+        while(!q.empty()){
+            int size=q.size();
+            for(int i=0;i<size;i++){
+              Node* cur=q.front();
+              q.pop();
+              if(i<size-1){
+                  Node* nex=q.front();
+                  cur->next=nex;
+              }
+              else cur->next=NULL;
+                
+                if(cur->left){
+                    q.push(cur->left);
+                }
+                if(cur->right){
+                    q.push(cur->right);
+                }
+            }
+            
+        }
+        return root;
+    }
+
+
+
+// two nodes are swapped in the bst 
+// recover the corrrect bst
+// maintain prev,first,middle(second),last pointers
+// inorder gives sorted elements
+// after calling left recursion
+// check if prev exists and prev->val>root->val (wrong order)
+// then check if it's the first time wrong order is yes make first=prev and middle=root other  wise
+// last =root
+// if last is not null , swap last  and first (inorder gives sorted order , only swapping of first and last can maintain the right order)
+// other wise swap first and middle
+class Solution {
+    TreeNode* first;
+    TreeNode* middle;
+    TreeNode* last;
+    TreeNode* prev;
+public:
+    void inorder(TreeNode* root){
+        if(root==NULL) return;
+        inorder(root->left);
+        if(prev){
+            if(prev->val>root->val){
+                if(first==NULL){
+                    first=prev;
+                    middle=root;
+                }
+                else{
+                    last=root;
+                }
+            }
+        }
+        prev=root;
+        inorder(root->right);
+    }
+    void recoverTree(TreeNode* root) {
+        prev=NULL;
+        first=NULL;
+        middle=NULL;
+        last=NULL;
+        inorder(root);
+        if(last){
+            swap(first->val,last->val);
+        }
+        else swap(first->val,middle->val);
+    }
+};
+
+
+
+vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
+        vector<vector<int>> ans;
+        if(root==NULL) return ans;
+        queue<TreeNode*> q;
+        q.push(root);
+        bool f=1;
+        while(!q.empty()){
+            int size=q.size();
+            vector<int> temp(size);
+            for(int i=0;i<size;i++){
+                int index=(f)?i:(size-i-1);
+                TreeNode* cur=q.front();
+                q.pop();
+                temp[index]=cur->val;
+                if(cur->left){
+                    q.push(cur->left);
+                }
+                if(cur->right){
+                    q.push(cur->right);
+                }
+            }
+            ans.push_back(temp);
+            f=!f;
+        }
+        return ans;
+    }
+
+
