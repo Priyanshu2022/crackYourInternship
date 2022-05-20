@@ -3869,3 +3869,217 @@ vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
     }
 
 
+
+
+
+// hidden cameras
+// we have to place minimum cameras in nodes so that every node is covered 
+// (a camera looks over parent and it's children)
+// we will check from bottom (post order)
+// process after calculating left and right
+// first check if any of the children want then camera , if yes then increase and return provide
+// other wise if any of them provide , then return 'ok' , that means this is covered
+// if both the child nodes are 'ok' return 'want'
+
+// at last check if the root itself , want a camera then increase 
+string solve(TreeNode* root,int &numberOfCameras){
+        if(root==NULL) return "ok";
+        string left=solve(root->left,numberOfCameras);
+        string right=solve(root->right,numberOfCameras);
+        if(left=="want" || right=="want"){
+            numberOfCameras++;
+            return "provide";
+        }
+        else if(left=="provide" || right=="provide"){
+            return "ok";
+        }
+        else return "want";
+    }
+    int minCameraCover(TreeNode* root) {
+        int numberOfCameras=0;
+        if(solve(root,numberOfCameras)=="want") numberOfCameras++;
+        return numberOfCameras;
+    }
+
+
+
+
+// binary tree maximum path
+// any path where nodes can come in the sequence at most 1
+// we are returning the maximum sum of either the left or right part
+// and at current node we are finding maximum of left+right+root->valid
+int solve(TreeNode* root,int &ans){
+        if(root==NULL){
+            return 0;
+        }
+        int left=max(0,solve(root->left,ans));
+        int right=max(0,solve(root->right,ans));
+        ans=max(ans,left+right+root->val);
+        return root->val+max(left,right);
+    }
+public:
+    int maxPathSum(TreeNode* root) {
+        int ans=INT_MIN;
+        solve(root,ans);
+        return ans;
+    }
+
+
+
+
+// binary tree to doubly linked list
+// inorder
+// left will act as previous and right as next
+// maintain a previous and make the first node as head
+// point root's left to prev and prev's right to root
+void solve(Node* root,Node* &prev,Node* &head){ // pass both by reference
+        if(root==NULL) return ;
+        solve(root->left,prev,head);
+        if(prev==NULL) head=root;
+        else{
+            root->left=prev;
+            prev->right=root;
+        }
+        prev=root;
+        solve(root->right,prev,head);
+    }
+    Node * bToDLL(Node *root)
+    {
+        Node* prev=NULL;
+        Node* head=NULL;
+        solve(root,prev,head);
+        return head;
+    }
+
+
+
+// bst from preorder
+// maintain a bound and iterate in the preorder and make nodes
+TreeNode* build(vector<int> &preorder,int &i,int bound){
+        if(i==preorder.size() || preorder[i]>bound) return NULL;
+        TreeNode* root=new TreeNode(preorder[i]);
+        i++;
+        root->left=build(preorder,i,root->val);
+        root->right=build(preorder,i,bound);
+        return root;
+    }
+    TreeNode* bstFromPreorder(vector<int>& preorder) {
+        int i=0;
+        return build(preorder,i,INT_MAX);
+    }
+
+
+
+
+// one approach can call valid bst for every node
+// OPTIMAL->
+// largest bst in a binary tree
+// for every node maintain , maximum , minimum, and maximum size bst, below and with this
+// if root is null max will be INT_MIN , min will be INT_MAX
+// calulate left and right
+// if bst (left ka maximum se bada root, right ke minimum se chota root)
+// min will be minimum of root->val and left minimum
+// max will be maximum of root->val and right maximum
+// max size will be right ka + left ka +1
+// else if it is not a bst , from this it cannot be our answer
+// so we will return max as INT_MAX , min as INT_MIN and maxSize as max of left and right
+class NodeValue {
+public:
+    int maxNode, minNode, maxSize;
+    
+    NodeValue(int minNode, int maxNode, int maxSize) {
+        this->maxNode = maxNode;
+        this->minNode = minNode;
+        this->maxSize = maxSize;
+    }
+};
+
+class Solution {
+private:
+    NodeValue largestBSTSubtreeHelper(TreeNode* root) {
+        // An empty tree is a BST of size 0.
+        if (!root) {
+            return NodeValue(INT_MAX, INT_MIN, 0);
+        }
+        
+        // Get values from left and right subtree of current tree.
+        auto left = largestBSTSubtreeHelper(root->left);
+        auto right = largestBSTSubtreeHelper(root->right);
+        
+        // Current node is greater than max in left AND smaller than min in right, it is a BST.
+        if (left.maxNode < root->val && root->val < right.minNode) {
+            // It is a BST.
+            return NodeValue(min(root->val, left.minNode), max(root->val, right.maxNode), 
+                            left.maxSize + right.maxSize + 1);
+        }
+        
+        // Otherwise, return [-inf, inf] so that parent can't be valid BST
+        return NodeValue(INT_MIN, INT_MAX, max(left.maxSize, right.maxSize));
+    }
+    public:
+    int largestBSTSubtree(TreeNode* root) {
+        return largestBSTSubtreeHelper(root).maxSize;
+    }
+};
+
+
+
+// median of a bst
+// 1st method store in array
+// 2nd find height , if even move with a previous in inorder and find the median
+// 3rd in constant space
+
+
+// maintain a prev and do inorder
+void solve(TreeNode* root,int &mini,TreeNode* &prev){
+        if(root==NULL) return;
+        solve(root->left,mini,prev);
+        if(prev==NULL){
+            prev=root;
+        }
+        else{
+            mini=min(mini,root->val-prev->val);
+            prev=root;
+        }
+        solve(root->right,mini,prev);
+    }
+    int getMinimumDifference(TreeNode* root) {
+        int mini=INT_MAX;
+        TreeNode* prev=NULL;
+        solve(root,mini,prev);
+        return mini;
+    }
+
+
+
+vector<int> verticalOrder(Node *root)
+    {
+        // hd       level  node's value 
+        map<int,map<int,vector<int>>> mp;
+        vector<int> ans;
+        if(root==NULL) return ans;
+        
+        //        node        hd  level
+        queue<pair<Node*,pair<int,int>>> q;
+        q.push({root,{0,0}});
+        while(!q.empty()){
+            auto temp=q.front();
+            q.pop();
+            int hd=temp.second.first;
+            int lvl=temp.second.second;
+            mp[hd][lvl].push_back(temp.first->data);
+            if(temp.first->left) q.push({temp.first->left,{hd-1,lvl+1}});
+            if(temp.first->right) q.push({temp.first->right,{hd+1,lvl+1}});
+        }
+        for(auto i:mp){
+            for(auto j:i.second){
+                for(auto cur:j.second){
+                    ans.push_back(cur);
+                }
+            }
+        }
+        return ans;
+    }
+
+
+
