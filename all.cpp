@@ -4083,3 +4083,264 @@ vector<int> verticalOrder(Node *root)
 
 
 
+
+
+// decode string
+// Input: s = "3[a2[c]]"
+// Output: "accaccacc"
+// if digit calculate num
+// if alpha add in res
+// if opening push both and update to zero
+// if closing , add res nums.top()-1 times and add chars .top from start
+// then pop both
+string decodeString(string s) {
+        stack<int> nums;
+        stack<string> chars;
+        string res="";
+        int num=0;
+        for(auto c:s){
+            if(isdigit(c)) num=num*10+c-'0';
+            else if(isalpha(c)) res+=c;
+            else if(c=='['){
+                nums.push(num);
+                chars.push(res);
+                num=0;
+                res="";
+            }
+            else if(c==']'){
+                string temp=res;
+                for(int i=0;i<nums.top()-1;i++){
+                    res+=temp;
+                }
+                res=chars.top()+res;
+                nums.pop();
+                chars.pop();
+            }
+        }
+        return res;
+    }
+
+
+
+// flood fill
+void dfs(vector<vector<int>>& image, int sr, int sc,int newColor,int rows,int cols,int source)
+    {
+        if(sr<0 || sr>=rows || sc<0 || sc>=cols)
+            return;
+        else if(image[sr][sc]!=source)
+            return;
+        
+        image[sr][sc] = newColor;
+        
+        dfs(image,sr-1,sc,newColor,rows,cols,source);  
+        dfs(image,sr+1,sc,newColor,rows,cols,source);   
+        dfs(image,sr,sc-1,newColor,rows,cols,source);  
+        dfs(image,sr,sc+1,newColor,rows,cols,source);   
+    }
+    vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int newColor) {
+        if(image[sr][sc]==newColor) return image;
+        int rows = image.size();
+        int cols = image[0].size();
+        int source = image[sr][sc]; 
+        dfs(image,sr,sc,newColor,rows,cols,source);
+        return image;
+    }
+
+
+// graph 
+// to store in adjacency list space -> n+2e (n=no. of nodes, e =no of edges) 
+// if weights are also stored -> n+2e+2e
+
+// bfs
+vector < int > bfsOfGraph(int V, vector < int > adj[]) {
+      vector < int > bfs;
+      vector < int > vis(V, 0);
+      queue < int > q;
+      q.push(0);
+      vis[0] = 1;
+      while (!q.empty()) {
+        int node = q.front();
+        q.pop();
+        bfs.push_back(node);
+
+        for (auto it: adj[node]) {
+          if (!vis[it]) {
+            q.push(it);
+            vis[it] = 1;
+          }
+        }
+      }
+
+      return bfs;
+    }
+
+// dfs
+void dfs(int node, vector<int> &vis, vector<int> adj[], vector<int> &storeDfs) {
+        storeDfs.push_back(node); 
+        vis[node] = 1; 
+        for(auto it : adj[node]) {
+            if(!vis[it]) {
+                dfs(it, vis, adj, storeDfs); 
+            }
+        }
+    }
+    vector<int>dfsOfGraph(int V, vector<int> adj[]){
+        vector<int> storeDfs; 
+        vector<int> vis(V+1, 0); 
+      for(int i = 1;i<=V;i++) {
+        if(!vis[i]) dfs(i, vis, adj, storeDfs); 
+      }
+        return storeDfs; 
+    }
+
+
+
+// no of islands -> dfs
+void dfs(vector<vector<char>> &grid,vector<vector<int>> &vis,int i,int j){
+        if(i<0 || j<0 || i>=grid.size() || j>=grid[0].size()) return; 
+        if(grid[i][j]=='0') return;
+        if(vis[i][j]!=-1) return ;
+        vis[i][j]=1;
+        dfs(grid,vis,i+1,j);
+        dfs(grid,vis,i-1,j);
+        dfs(grid,vis,i,j+1);
+        dfs(grid,vis,i,j-1);
+    }
+    int numIslands(vector<vector<char>>& grid) {
+        int ans=0;
+        vector<vector<int>> vis(grid.size(),vector<int>(grid[0].size(),-1));
+        for(int i=0;i<grid.size();i++){
+            for(int j=0;j<grid[0].size();j++){
+                if(grid[i][j]=='1' && vis[i][j]==-1){
+                    ans++;
+                    dfs(grid,vis,i,j);
+                }
+            }
+        }
+        return ans;
+    }
+
+
+
+
+// rat in a maze problem
+void solve(vector<string> &ans,string s,int i,int j,vector<vector<int>> &m,int n,vector<vector<int>> &vis){
+        if(i==n-1 && j==n-1 ){
+            ans.push_back(s);
+            return;
+        }
+        if(i>=n || i<0 || j>=n || j<0 || m[i][j]==0 || vis[i][j]==1){
+            return;
+        }
+        vis[i][j]=1;
+        solve(ans,s+'D',i+1,j,m,n,vis);
+        solve(ans,s+'U',i-1,j,m,n,vis);
+        solve(ans,s+'R',i,j+1,m,n,vis);
+        solve(ans,s+'L',i,j-1,m,n,vis);
+        vis[i][j]=0;
+    }
+    vector<string> findPath(vector<vector<int>> &m, int n) {
+        
+        vector<string> ans;
+        if(m[n-1][n-1]==0) return ans;
+        string s="";
+        vector<vector<int>> vis(n,vector<int>(n,0));
+        solve(ans,s,0,0,m,n,vis);
+        return ans;
+    }
+
+
+
+// find any one and run dfs on it while storing the nodes then break
+    // now from the nodes in queue run bfs and find minimum distance
+    void dfs(int x,int y,vector<vector<int>> &grid,vector<vector<int>> &vis,queue<pair<int,int>> &q){
+        if(x<0 || y<0 || x>=grid.size() || y>=grid[0].size() || vis[x][y]!=-1 || grid[x][y]==0) return;
+        vis[x][y]=1;
+        q.push({x,y});
+        int dx[]={1,-1,0,0};
+        int dy[]={0,0,1,-1};
+        for(int i=0;i<4;i++){
+            int cx=x+dx[i];
+            int cy=y+dy[i];
+            dfs(cx,cy,grid,vis,q);
+        }
+    }
+    int shortestBridge(vector<vector<int>>& grid) {
+        int n=grid.size();
+        int m=grid[0].size();
+        queue<pair<int,int>> q;
+        vector<vector<int>> vis(n,vector<int>(m,-1));
+        bool f=0;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(grid[i][j]==1){
+                    dfs(i,j,grid,vis,q);
+                    f=1;
+                    break;
+                }
+            }
+            if(f) break;
+        }
+        int dist=0;
+        int dx[]={1,-1,0,0};
+        int dy[]={0,0,1,-1};
+        while(!q.empty()){
+            dist++;
+            int size=q.size();
+            for(int i=0;i<size;i++){
+                pair<int,int> temp=q.front();
+                int x=temp.first;
+                int y=temp.second;
+                q.pop();
+                for(int j=0;j<4;j++){
+                    int cx=x+dx[j];
+                    int cy=y+dy[j];
+                    if(cx<0 || cy<0 || cx>=n || cy>=m || vis[cx][cy]==1) continue;
+                    vis[cx][cy]=1;
+                    if(grid[cx][cy]==1) return dist-1;
+                    q.push({cx,cy});
+                }
+            }
+        }
+        return -1;
+    }
+
+
+
+// steps by knight 
+// minimum steps to react target -> bfs
+int minStepToReachTarget(vector<int>&KnightPos,vector<int>&TargetPos,int N)
+    {
+        int ans=0;
+        int s1=KnightPos[0]-1;
+        int s2=KnightPos[1]-1;
+        int d1=TargetPos[0]-1;
+        int d2=TargetPos[1]-1;
+        vector<vector<int>> vis(N,vector<int>(N,-1));
+        if(s1==d1 && s2==d2) return 0;
+        queue<pair<int,int>> q;
+        q.push({s1,s2});
+        int dx[]={2,2,-2,-2,1,1,-1,-1};
+        int dy[]={1,-1,1,-1,2,-2,2,-2};
+        bool f=0;
+        while(!q.empty()){
+            ans++;
+            int size=q.size();
+            for(int i=0;i<size;i++){
+                pair<int,int> temp=q.front();
+                q.pop();
+                int x=temp.first;
+                int y=temp.second;
+                for(int i=0;i<8;i++){
+                    int cx=x+dx[i];
+                    int cy=y+dy[i];
+                    if(cx<0 || cy<0 || cx>=N || cy>=N || vis[cx][cy]!=-1) continue;
+                    if(cx==d1 && cy==d2) return ans;
+                    vis[cx][cy]=1;
+                    q.push({cx,cy});
+                }
+            }
+        }
+        return -1;
+    }
+
