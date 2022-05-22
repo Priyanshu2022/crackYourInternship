@@ -4344,3 +4344,241 @@ int minStepToReachTarget(vector<int>&KnightPos,vector<int>&TargetPos,int N)
         return -1;
     }
 
+
+
+
+
+// cycle detection in undirected
+// dfs -> maintain parent to differentiate between next and previous node
+bool checkForCycle(int node, int parent, vector < int > & vis, vector < int > adj[]) {
+      vis[node] = 1;
+      for (auto it: adj[node]) {
+        if (!vis[it]) {
+          if (checkForCycle(it, node, vis, adj))
+            return true;
+        } else if (it != parent)
+          return true;
+      }
+
+      return false;
+    }
+    bool isCycle(int V, vector < int > adj[]) {
+      vector < int > vis(V + 1, 0);
+      for (int i = 0; i < V; i++) {
+        if (!vis[i]) {
+          if (checkForCycle(i, -1, vis, adj)) return true;
+        }
+      }
+
+      return false;
+    } 
+
+
+// bfs -> queue will be of node and parent
+bool checkForCycle(int s, int V, vector<int> adj[], vector<int> &visited)
+    {
+        // Create a queue for BFS
+        queue<pair<int, int>> q;
+        visited[s] = true;
+        q.push({s, -1});
+        while (!q.empty())
+        {
+            int node = q.front().first;
+            int par = q.front().second;
+            q.pop();
+ 
+            for (auto it : adj[node])
+            {
+                if (!visited[it])
+                {
+                    visited[it] = true;
+                    q.push({it, node});
+                }
+                else if (par != it)
+                    return true;
+            }
+        }
+        return false;
+    }
+    bool isCycle(int V, vector<int> adj[])
+    {
+        vector<int> vis(V - 1, 0);
+        for (int i = 1; i <= V; i++)
+        {
+            if (!vis[i])
+            {
+                if (checkForCycle(i, V, adj, vis))
+                    return true;
+            }
+        }
+    }
+
+
+
+// for undirected graph
+// dfs discussed above will not work
+// as we can visit same node if direction is same
+// maintain vis and dfsvis(if the node is visited in the current movement)
+bool checkCycle(int node, vector < int > adj[], int vis[], int dfsVis[]) {
+      vis[node] = 1;
+      dfsVis[node] = 1;
+      for (auto it: adj[node]) {
+        if (!vis[it]) {
+          if (checkCycle(it, adj, vis, dfsVis)) return true;
+        } else if (dfsVis[it]) {
+          return true;
+        }
+      }
+      dfsVis[node] = 0;
+      return false;
+    }
+    bool isCyclic(int N, vector < int > adj[]) {
+      int vis[N], dfsVis[N];
+      memset(vis, 0, sizeof vis);
+      memset(dfsVis, 0, sizeof dfsVis);
+
+      for (int i = 0; i < N; i++) {
+        if (!vis[i]) {
+          if (checkCycle(i, adj, vis, dfsVis)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+
+
+
+// disjoint set
+// given two nodes tell if belong to same component or not
+// findPar(), Union()
+// we will maintain a rank (initially rank will be zero of all the nodes)
+// if attaching two same rank guys , rank of the node to which we are attaching should increase
+// when rank is diffent attach smaller to larger (no need to change the rank)
+void makeSet(){
+    for(int i=1;i<=n;i++){
+        parent[i]=i;
+        rank[i]=0;
+    }
+}
+int findPar(int node){
+    if(node==parent[node]){
+        return node;
+    }
+    return parent[node]=findPar(parent[node]);
+}
+void union(int u,int v){
+    u=findPar(u);
+    v=findPar(v);
+    if(rank[u]<rank[v]){
+        parent[u]=v;
+    }
+    else if(rank[v]<rank[u]){
+        parent[v]=u;
+    }
+    else{
+        parent[v]=u;
+        rank[u]++;
+    } 
+}
+
+
+
+
+// find eventual safe state
+// find state from where we can reach to terminal node (without entering in loop)
+// find how many are in cycle using detect cycle in directed graph
+bool dfs(int node,vector<vector<int>> &graph,vector<int> &vis,vector<int> &dfsVis,vector<bool>& present_cycle){
+        vis[node]=1;
+        dfsVis[node]=1;
+        for(auto it:graph[node]){
+            if(!vis[it]){
+                if(dfs(it,graph,vis,dfsVis,present_cycle)){
+                    return present_cycle[node]=true;
+                }
+            }
+            else if(dfsVis[it]) return present_cycle[node]=true;
+        }
+        dfsVis[node]=0;
+        return false;
+    }
+    vector<int> eventualSafeNodes(vector<vector<int>>& graph) {
+        int n=graph.size();
+        vector<int> vis(n,0);
+        vector<int> dfsVis(n,0);
+        vector<bool> present_cycle(n,false);
+        for(int i=0;i<n;i++){
+            if(!vis[i]) dfs(i,graph,vis,dfsVis,present_cycle);
+        }
+        vector<int> ans;
+        for(int i=0;i<n;i++){
+            if(!present_cycle[i]) ans.push_back(i);
+        }
+        return ans;
+    }
+
+
+
+
+// strongly connected comoponent (directed graph)
+// Kosaraju's Algorithm
+// from every node of that component we can reach to every other node
+    // find toposort of the graph
+    // transpose the graph
+    // then run dfs according to topo sort
+    void dfs(int node,vector<int> adj[],vector<int> &vis,stack<int> &st){
+        vis[node]=1;
+        for(auto it:adj[node]){
+            if(!vis[it]) dfs(it,adj,vis,st);
+        }
+        st.push(node);
+    }
+    void revdfs(int node,vector<int> transpose[],vector<int> &vis){
+        vis[node]=1;
+        for(auto it:transpose[node]){
+            if(!vis[it]) revdfs(it,transpose,vis);
+        }
+    }
+    int kosaraju(int V, vector<int> adj[])
+    {
+        stack<int> st;
+        vector<int> vis(V,0);
+        for(int i=0;i<V;i++) if(!vis[i]) dfs(i,adj,vis,st);
+        vector<int> transpose[V];
+        for(int i=0;i<V;i++){
+            vis[i]=0;
+            for(auto it:adj[i]){
+                transpose[it].push_back(i);
+            }
+        }
+        int ans=0;
+        while(!st.empty()){
+            int node=st.top();
+            st.pop();
+            if(!vis[node]){
+                ans++;
+                revdfs(node,transpose,vis);
+            }
+        }
+        return ans;
+    }
+
+
+
+// minutes needed to inform parent +   max time needed by childrens
+    int dfs(vector<int> adj[],int node,vector<int> &informTime){
+        int maxi=0;
+        for(auto it:adj[node]){
+            maxi=max(maxi,dfs(adj,it,informTime));
+        }
+        return maxi+informTime[node];
+    }
+    int numOfMinutes(int n, int headID, vector<int>& manager, vector<int>& informTime) {
+        vector<int> adj[n];
+        for(int i=0;i<n;i++){
+            if(manager[i]!=-1)
+                adj[manager[i]].push_back(i);
+        }
+        return dfs(adj,headID,informTime);
+    }

@@ -2,7 +2,7 @@
 // to store in adjacency list space -> n+2e (n=no. of nodes, e =no of edges) 
 // if weights are also stored -> n+2e+2e
 
-// bfs
+// bfs -> tc = n+e, sc=n+e+n+n
 vector < int > bfsOfGraph(int V, vector < int > adj[]) {
       vector < int > bfs;
       vector < int > vis(V, 0);
@@ -25,7 +25,7 @@ vector < int > bfsOfGraph(int V, vector < int > adj[]) {
       return bfs;
     }
 
-// dfs
+// dfs -> tc=n+e , sc=n+e+n+n
 void dfs(int node, vector<int> &vis, vector<int> adj[], vector<int> &storeDfs) {
         storeDfs.push_back(node); 
         vis[node] = 1; 
