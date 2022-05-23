@@ -4582,3 +4582,323 @@ bool dfs(int node,vector<vector<int>> &graph,vector<int> &vis,vector<int> &dfsVi
         }
         return dfs(adj,headID,informTime);
     }
+
+
+
+
+// given matrix of 0 and 1 , find a zero such that distance of that from the nearest one is maximised
+// go from 1 to zero , put all one in queue
+// and run dfs
+int maxDistance(vector<vector<int>>& grid) {
+        queue<pair<int,int>> q;
+        bool one=false,zero=false;
+        for(int i=0;i<grid.size();i++){
+            for(int j=0;j<grid[0].size();j++){
+                if(grid[i][j]==1) one =true;
+                if(grid[i][j]==0) zero=true;
+                if(grid[i][j]==1) q.push({i,j});
+            }
+        }
+        if(!one || !zero ) return -1;
+        int ans=0;
+        int dx[]={1,-1,0,0};
+        int dy[]={0,0,1,-1};
+        while(!q.empty()){
+            int size=q.size();
+            while(size--){
+                int x=q.front().first;
+                int y=q.front().second;
+                q.pop();
+                for(int i=0;i<4;i++){
+                    int cx=x+dx[i];
+                    int cy=y+dy[i];
+                    if(cx<0 || cy<0 || cx>=grid.size() || cy>=grid[0].size() || grid[cx][cy]==1) continue;
+                    grid[cx][cy]=1;
+                    q.push({cx,cy});
+                }
+            }
+            if(!q.empty()) ans++;
+        }
+        return ans;
+    }
+
+
+
+
+// bipartite graph
+// graph which can be coloured using 2 colors
+// bfs , if any componenet gives false then the answer is false
+// maintain a color array
+bool bipartiteBfs(int node,vector<int> adj[],vector<int> &color){
+        queue<int> q;
+        q.push(node);
+        while(!q.empty()){
+            int temp=q.front();
+            q.pop();
+            for(auto it:adj[temp]){
+                if(color[it]==-1) {
+                    color[it]=1-color[temp];
+                    q.push(it);
+                }
+                else if(color[it]==color[temp]) return false;
+            }
+        }
+        return true;
+    }
+    bool isBipartite(int V, vector<int>adj[]){
+        vector<int> color(V,-1);
+        for(int i=0;i<V;i++){
+            if(color[i]==-1){
+                if(bipartiteBfs(i,adj,color)==false) return false;
+            }
+        }
+        return true;
+    }
+
+
+// dfs
+// maintain color
+bool bipartiteDfs(int node, vector<int> adj[], int color[]) {
+    for(auto it : adj[node]) {
+        if(color[it] == -1) {
+            color[it] = 1 - color[node];
+            if(!bipartiteDfs(it, adj, color)) {
+                return false; 
+            }
+        } else if(color[it] == color[node]) return false; 
+    }
+    return true; 
+}
+bool checkBipartite(vector<int> adj[], int n) {
+    int color[n];
+    memset(color, -1, sizeof color); 
+    for(int i = 0;i<n;i++) {
+        if(color[i] == -1) {
+            color[i] = 1;
+            if(!bipartiteDfs(i, adj, color)) {
+                return false;
+            }
+        } 
+    }
+    return true; 
+}
+
+
+
+
+// first task is dependent on the second one 
+// detect cylce in directed graph
+bool detectCycle(int node,vector<int> adj[],vector<int> &vis,vector<int> &dfsvis){
+        vis[node]=1;
+        dfsvis[node]=1;
+        for(auto it:adj[node]){
+            if(!vis[it]){
+                if(detectCycle(it,adj,vis,dfsvis)==true) return true;
+            }
+            else if(dfsvis[it]) return true;
+        }
+        dfsvis[node]=0;
+        return false;
+    }
+    bool isPossible(int n, vector<pair<int, int> >& prerequisites) {
+        vector<int> adj[n];
+        for(int i=0;i<prerequisites.size();i++){
+            adj[prerequisites[i].first].push_back(prerequisites[i].second);
+        }
+        vector<int> vis(n,0);
+        vector<int> dfsvis(n,0);
+        for(int i=0;i<n;i++){
+            if(!vis[i]) if(detectCycle(i,adj,vis,dfsvis)==true) return false;
+        }
+        return true;
+    }
+
+
+
+// find the city , from which we can visit smallest number of cities under the given distance
+// floyyd warshall -> all pair shortes path
+int findTheCity(int n, vector<vector<int>>& edges, int distanceThreshold) {
+        vector<vector<int>> dist(n,vector<int> (n,INT_MAX));
+        for(int i=0;i<n;i++) dist[i][i]=0;
+        for(auto it:edges){
+            dist[it[0]][it[1]]=it[2];
+            dist[it[1]][it[0]]=it[2];
+        }
+        for(int k=0;k<n;k++){ // k is our pivot
+            for(int i=0;i<n;i++){
+                for(int j=0;j<n;j++){
+                    if(dist[i][k]!=INT_MAX && dist[k][j]!=INT_MAX && (dist[i][k]+dist[k][j])<dist[i][j]){
+                        dist[i][j]=dist[i][k]+dist[k][j];
+                    }
+                }
+            }
+        }
+        int ans;
+        int cityCount=INT_MAX;
+        for(int i=0;i<n;i++){
+            int count=0;
+            for(int j=0;j<n;j++){
+                if(dist[i][j]<=distanceThreshold) count++;
+            }
+            if(cityCount>=count){
+                ans=i;
+                cityCount=count;
+            }
+        }
+        return ans;
+    }
+
+
+
+
+// floyd warshall
+// all pair shortest path
+// mark diagonal elements as zero
+// rest all as int max
+// now n^3 loop (1st one for pivot , i.e if we can go through this pivot with less distance)
+void shortest_distance(vector<vector<int>>&matrix){
+        int n=matrix.size();
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                if(i==j) matrix[i][j]=0;
+                else if(matrix[i][j]==-1) matrix[i][j]=INT_MAX;
+            }
+        }
+        for(int k=0;k<n;k++){
+            for(int i=0;i<n;i++){
+                for(int j=0;j<n;j++){
+                    if(matrix[i][k]!=INT_MAX && matrix[k][j]!=INT_MAX && (matrix[i][k]+matrix[k][j]<matrix[i][j])){
+                        matrix[i][j]=matrix[i][k]+matrix[k][j];
+                    }
+                }
+            }
+        }
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                if(matrix[i][j]==INT_MAX) matrix[i][j]=-1;
+            }
+        }
+    }
+
+
+
+
+// mst using kruskals
+// first transfer adj to all edges list
+// then sort according to weigth
+// then iterate on this edges 
+// if have different parent , add weith to answer
+    int findPar(int node,vector<int> &parent){
+        if(node==parent[node]){
+            return node;
+        }
+        return parent[node]=findPar(parent[node],parent);
+    }
+    void Union(int u,int v,vector<int> &rank,vector<int> &parent){
+        u=findPar(u,parent);
+        v=findPar(v,parent);
+        if(rank[u]<rank[v]){
+            parent[u]=v;
+        }
+        else if(rank[v]<rank[u]){
+            parent[v]=u;
+        }
+        else{
+            parent[v]=u;
+            rank[u]++;
+        } 
+    }
+    int spanningTree(int V, vector<vector<int>> adj[])
+    {
+        vector<pair<int,pair<int,int>>> v;
+        for(int i=0;i<V;i++){
+            for(auto it:adj[i]){
+                v.push_back({it[1],{i,it[0]}});
+                
+            }
+        }
+        vector<int> rank(V,0);
+        vector<int> parent(V);
+        for(int i=0;i<V;i++){
+            parent[i]=i;
+        }
+        sort(v.begin(),v.end());
+        int ans=0;
+        for(int i=0;i<v.size();i++){
+            if(findPar(v[i].second.first,parent)!=findPar(v[i].second.second,parent)){
+                ans+=v[i].first;
+                Union(v[i].second.first,v[i].second.second,rank,parent);
+            }
+        }
+        return ans;
+    }
+
+
+
+
+// topological sort
+// can only be possible of directed acyclic graph
+// if u->v is a edge then u always appears before v
+
+// using dfs -> n+e (tc)
+// run dfs and in every node if not visited
+// put in answer after recursively calling all it's adjacent
+// then reverse the answer array
+void solve(int i,vector<int> adj[],vector<int> &vis,vector<int> &ans,int V){
+        vis[i]=1;
+        
+        for(auto it:adj[i]){
+            if(!vis[it]){
+                solve(it,adj,vis,ans,V);
+            }
+        }
+        ans.push_back(i);
+     
+    }
+    vector<int> topoSort(int V, vector<int> adj[]) 
+    {
+        vector<int> vis(V+1,0);
+        vector<int> ans;
+        for(int i=0;i<V;i++){
+            if(!vis[i]){
+                solve(i,adj,vis,ans,V);
+            }
+        }
+        reverse(ans.begin(),ans.end());
+        return ans;
+    }
+
+
+// using bfs
+// maintain indegree and push all indegree node's of zeros to the queue
+// not run bfs while queue is not empty , and whenever go to adjacent reduce indegree and check if zero
+vector<int> topo(int N, vector<int> adj[]) {
+        queue<int> q; 
+        vector<int> indegree(N, 0); 
+        for(int i = 0;i<N;i++) {
+            for(auto it: adj[i]) {
+                indegree[it]++; 
+            }
+        }
+        
+        for(int i = 0;i<N;i++) {
+            if(indegree[i] == 0) {
+                q.push(i); 
+            }
+        }
+        vector<int> topo;
+        while(!q.empty()) {
+            int node = q.front(); 
+            q.pop(); 
+            topo.push_back(node);
+            for(auto it : adj[node]) {
+                indegree[it]--;
+                if(indegree[it] == 0) {
+                    q.push(it); 
+                }
+            }
+        }
+        return topo;
+    }
+
+

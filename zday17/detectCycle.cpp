@@ -65,7 +65,7 @@ bool checkForCycle(int s, int V, vector<int> adj[], vector<int> &visited)
 
 
 
-// for undirected graph
+// for directed graph
 // dfs discussed above will not work
 // as we can visit same node if direction is same
 // maintain vis and dfsvis(if the node is visited in the current movement)
@@ -96,3 +96,8 @@ bool checkCycle(int node, vector < int > adj[], int vis[], int dfsVis[]) {
       }
       return false;
     }
+
+
+// bfs 
+// we will check if we can form topo sort then ,then no cycle
+// count the total elements of topo sort if they are equal to n , then it does not have a cycle
