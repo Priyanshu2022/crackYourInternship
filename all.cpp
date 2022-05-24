@@ -4902,3 +4902,199 @@ vector<int> topo(int N, vector<int> adj[]) {
     }
 
 
+
+
+
+// dijkstra is not possible in a graph with negative cycle
+// make a distTo vector
+// iterate over all edges , n-1 times , and update if possible
+// run one more time for check , if yet it any edge is getting relaxed , means graph has a negative cycle
+int isNegativeWeightCycle(int n, vector<vector<int>>edges){
+        vector<int> distTo(n,1e7);
+        for(int i=1;i<=n-1;i++){
+            for(auto it:edges){
+                if(distTo[it[1]]>distTo[it[0]]+it[2]){
+                    distTo[it[1]]=distTo[it[0]]+it[2];
+                }
+            }
+        }
+        bool f=0;
+        for(auto it:edges){
+            if(distTo[it[1]]>distTo[it[0]]+it[2]){
+                f=1;
+                break;
+            }
+        }
+        if(f) return 1;
+        else return 0;
+    }
+
+
+
+
+// maintain stops array , which will contain stops required to reach
+// priority will now also contain stops
+// if distance is more than stored distance , still it can be answer 
+// check if new stops is less than stored stops , if yes push
+
+int findCheapestPrice(int n, vector<vector<int>>& flights, int src, int dst, int k) {
+        vector<pair<int,int>> v[n];
+        for(int i=0;i<flights.size();i++){
+            v[flights[i][0]].push_back({flights[i][1],flights[i][2]});
+        }
+        vector<int> distTo(n,INT_MAX);
+        vector<int> stops(n,INT_MAX);
+        priority_queue<vector<int>,vector<vector<int>>,greater<vector<int>> > pq;
+        stops[src]=0;
+        pq.push({0,src,stops[src]});
+        while(!pq.empty()){
+            int dist=pq.top()[0];
+            int node=pq.top()[1];
+            int curStops=pq.top()[2];
+            pq.pop();
+            if(node==dst) return dist;
+            if(curStops==k+1) continue;
+            for(auto it:v[node]){
+                int nextNode=it.first;
+                int nextDist=it.second;
+                int nextStops=curStops+1;
+                if(distTo[nextNode]>dist+nextDist){
+                    distTo[nextNode]=dist+nextDist;
+                    stops[nextNode]=nextStops;
+                    pq.push({distTo[nextNode],nextNode,nextStops});
+                }
+                else if(nextStops<stops[nextNode]){
+                    pq.push({nextDist+dist,nextNode,nextStops});
+                }
+            }
+        }
+        return -1;
+    }
+
+
+
+
+// dijkstra -> single source shortest path
+// vector<pair<int,int>> v[V] -> for each vertex , number of vertex connected with edges
+// min heap
+// distTo vector
+// update if possible
+vector <int> dijkstra(int V, vector<vector<int>> adj[], int S)
+    {
+        vector<pair<int,int>> v[V];
+        for(int i=0;i<V;i++){
+            // v[i].push_back({adj[i][0],adj[i][1]});
+            for(auto cur:adj[i]){
+                v[i].push_back({cur[0],cur[1]});
+            }
+        }
+        priority_queue<pair<int,int>,vector<pair<int,int> >,greater<pair<int,int> > > pq;
+        vector<int> distTo(V,INT_MAX);
+        distTo[S]=0;
+        pq.push({0,S});
+        while(!pq.empty()){
+            int dist=pq.top().first;
+            int node=pq.top().second;
+            pq.pop();
+            for(auto it:v[node]){
+                int next=it.first;
+                int nexdis=it.second;
+                if(nexdis+dist<distTo[next]){
+                    distTo[next]=dist+nexdis;
+                    pq.push({distTo[next],next});
+                }
+            }
+        }
+        return distTo;
+    }
+
+
+
+
+// most stones removed from same row or column
+// make a dsu of n size
+// run two for loops and if any of the row or column matches, union the indexes
+// after that check , how many stones have same parent , that will imply then number of components
+// removed stones = n-numberOfComponents(one stone of every componenet will remain)
+int findPar(int node,vector<int> &parent){
+        if(node==parent[node]){
+            return node;
+        }
+        return parent[node]=findPar(parent[node],parent);
+    }
+    void Union(int u,int v,vector<int> &rank,vector<int> &parent){
+        u=findPar(u,parent);
+        v=findPar(v,parent);
+        if(rank[u]<rank[v]){
+            parent[u]=v;
+        }
+        else if(rank[v]<rank[u]){
+            parent[v]=u;
+        }
+        else{
+            parent[u]=v;
+            rank[v]++;
+        } 
+    }
+    int removeStones(vector<vector<int>>& stones) {
+        int n=stones.size();
+        vector<int> rank(n,0);
+        vector<int> parent(n);
+        for(int i=0;i<n;i++) parent[i]=i;
+        for(int i=0;i<n;i++){
+            for(int j=i+1;j<n;j++){
+                if(stones[i][0]==stones[j][0] || stones[i][1]==stones[j][1]){
+                    Union(i,j,rank,parent);
+                }
+            }
+        }
+        int count=0;
+        for(int i=0;i<n;i++){
+            if(findPar(i,parent)==i) count++;
+        }
+        return n-count;
+    }
+
+
+
+
+
+// snake and ladder of n^n blocks
+// bfs algo
+// maintain a visited and a queue
+// find index positions of number in snake and ladder
+pair<int,int> findPosition(int cx,int n){
+        int i=n-((cx-1)/n) -1;
+        int j=(i%2==n%2)?(n-((cx-1)%n)-1):(cx-1)%n;
+        return {i,j};
+    }
+    int snakesAndLadders(vector<vector<int>>& board) {
+        int n=board.size();
+        queue<int> q;
+        q.push(1);
+        int steps=0;
+        vector<vector<int>> vis(n,vector<int>(n,0));
+        while(!q.empty()){
+            int size=q.size();
+            while(size--){
+                int x=q.front();
+                q.pop();
+                if(x==n*n) return steps;
+                for(int k=1;k<=6;k++){
+                    int cx=x+k;
+                    if(cx>n*n) break;
+                    pair<int,int> p=findPosition(cx,n);
+                    int i=p.first;
+                    int j=p.second;
+                    if(vis[i][j]) continue;
+                    vis[i][j]=1;
+                    if(board[i][j]==-1) q.push(cx);
+                    else q.push(board[i][j]);
+                }
+            }
+            steps++;
+        }
+        return -1;
+    }
+
+
