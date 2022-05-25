@@ -5098,3 +5098,262 @@ pair<int,int> findPosition(int cx,int n){
     }
 
 
+
+
+
+
+// alien dictionary
+// given sorted words 
+// we have to return the order of alphabets in their language
+// for every consecutive words , because of the first unmatching char first word comes before then second
+// link those words in graph
+// now find topo sort
+void dfs(int node,vector<vector<int>> &g,vector<int> &vis,string &ans){
+        vis[node]=1;
+        for(auto it:g[node]){
+            if(!vis[it]) dfs(it,g,vis,ans);
+        }
+        ans=ans+(char)(node+'a');
+    }
+    string findOrder(string dict[], int N, int K) {
+        vector<vector<int>> g(K);
+        for(int i=0;i<N-1;i++){
+            string word1=dict[i];
+            string word2=dict[i+1];
+            for(int j=0;j<word1.length()&&j<word2.length();j++){
+                if(word1[j]!=word2[j]){
+                    g[word1[j]-'a'].push_back(word2[j]-'a');
+                    break;
+                }
+            }
+        }
+        vector<int> vis(K,0);
+        string ans="";
+        for(int i=0;i<K;i++){
+            if(!vis[i]){
+                dfs(i,g,vis,ans);
+            }
+        }
+        reverse(ans.begin(),ans.end());
+        return ans;
+    }
+
+
+
+
+// longest increasing path in matrix
+// make a 2d dp and check for every index , maximum path we can get from here
+int dfs(int x,int y,vector<vector<int>> &matrix,vector<vector<int>> &dp){
+        if(dp[x][y]) return dp[x][y];
+        int dx[]={1,-1,0,0};
+        int dy[]={0,0,1,-1};
+        int ans=1;
+        for(int i=0;i<4;i++){
+            int cx=x+dx[i];
+            int cy=y+dy[i];
+            if(cx<0 || cy<0 || cx>=matrix.size() || cy>=matrix[0].size()) continue;
+            if(matrix[cx][cy]<=matrix[x][y]) continue;
+            ans=max(ans,1+dfs(cx,cy,matrix,dp));
+        }
+        return dp[x][y]=ans;
+    }
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
+        int n=matrix.size();
+        int m=matrix[0].size();
+        vector<vector<int>> dp(n,vector<int>(m,0));
+        int ans=0;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                ans=max(ans,dfs(i,j,matrix,dp));
+            }
+        }
+        return ans;
+    }
+
+
+
+
+// given a binary 2d binary matrix
+// we can change atmost a zero to one and get the largest size of island
+// firstly change all island to it's id and store <id , area> in the map
+// then again run 2 for loops , check if it is zero and converting it will give us how much area 
+void dfs(int x,int y,vector<vector<int>> &grid,int id,int &count){
+        if(x<0 || y<0 || x>=grid.size() || y>=grid.size()) return ;
+        if(grid[x][y]>1 || grid[x][y]==0) return ;
+        count++;
+        grid[x][y]=id;
+        int dx[]={1,-1,0,0};
+        int dy[]={0,0,1,-1};
+        for(int i=0;i<4;i++){
+            int cx=x+dx[i];
+            int cy=y+dy[i];
+            dfs(cx,cy,grid,id,count);
+        }
+    }
+    int largestIsland(vector<vector<int>>& grid) {
+        //  id  area
+        map<int,int> mp;
+        int n=grid.size();
+        int id=2;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                if(grid[i][j]==1){
+                    int count=0;
+                    dfs(i,j,grid,id,count);
+                    mp[id]=count;
+                    id++;
+                }
+            }
+        }
+        int ans=INT_MIN;
+        int dx[]={1,-1,0,0};
+        int dy[]={0,0,1,-1};
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                if(grid[i][j]==0){
+                    int sum=0;
+                    set<int> s;
+                    for(int k=0;k<4;k++){
+                        int cx=i+dx[k];
+                        int cy=j+dy[k];
+                        if(cx<0 || cy<0 || cx>=n || cy>=n || grid[cx][cy]==0) continue;
+                        if(s.find(grid[cx][cy])!=s.end()) continue;
+                        s.insert(grid[cx][cy]);
+                        sum+=mp[grid[cx][cy]];
+                    }
+                    ans=max(ans,sum+1);
+                }
+            }
+        }
+        return ans==INT_MIN?n*n:ans;
+    }
+
+
+
+
+// number of spanning tree
+// kirchoffs matrix tree theorem
+// make a matrix , n=m=no of vertices
+// if i!=j , if i and j adjacent m[i][j]=-1 , not adjacent m[i][j]=0
+// if i==j , m[i][j]=degree if i
+// then delete any row and any column
+// take determinant of remaing matrix
+
+
+
+
+// three array 
+// key -> which will store the weight of connected
+// parent -> paretn of the node
+// mstSet -> is part of mst
+// priority queue -> pair<int,int> -> weight and node 
+
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+    int N,m;
+    cin >> N >> m;
+    vector<pair<int,int> > adj[N]; 
+    int a,b,wt;
+    for(int i = 0; i<m ; i++){
+        cin >> a >> b >> wt;
+        adj[a].push_back(make_pair(b,wt));
+        adj[b].push_back(make_pair(a,wt));
+    }   
+    int parent[N];   
+    int key[N];   
+    bool mstSet[N]; 
+  
+    for (int i = 0; i < N; i++) key[i] = INT_MAX, mstSet[i] = false; 
+    priority_queue< pair<int,int>, vector <pair<int,int>> , greater<pair<int,int>> > pq;
+    key[0] = 0; 
+    parent[0] = -1; 
+    pq.push({0, 0});
+    while(!pq.empty())
+    { 
+        int u = pq.top().second; 
+        pq.pop(); 
+        mstSet[u] = true; 
+        for (auto it : adj[u]) {
+            int v = it.first;
+            int weight = it.second;
+            if (mstSet[v] == false && weight < key[v]) {
+                parent[v] = u;
+                key[v] = weight; 
+                pq.push({key[v], v});    
+            }
+        }
+            
+    } 
+    for (int i = 1; i < N; i++) 
+        cout << parent[i] << " - " << i <<" \n"; 
+    return 0;
+}
+
+
+
+
+// given two jugs , want to know weather it is possible measure target sum
+// we are effectively having one judge with capacity equal to it's sum of both jar's
+// we can basically increase the water by x, y and decrease by y
+// bfs -> tc=(total capacity)+e
+    bool canMeasureWater(int jug1Capacity, int jug2Capacity, int targetCapacity) {
+        int x=jug1Capacity;
+        int y=jug2Capacity;
+        int z=targetCapacity;
+        if(z>x+y) return false;
+        map<int,int> vis;
+        queue<int> q;
+        q.push(0);
+        vis[0]=1;
+        int dx[]={x,-x,y,-y};
+        while(!q.empty()){
+            int a=q.front();
+            q.pop();
+            if(a==z) return true;
+            for(int i=0;i<4;i++){
+                int ca=a+dx[i];
+                if(ca<0 || ca>x+y || vis.find(ca)!=vis.end()) continue;
+                vis[ca]=1;
+                q.push(ca);
+            }
+        }
+        return false;
+    }
+
+
+
+
+// Input: beginWord = "hit", endWord = "cog", wordList = ["hot","dot","dog","lot","log","cog"]
+// Output: 5
+// Explanation: One shortest transformation sequence is "hit" -> "hot" -> "dot" -> "dog" -> cog", which is 5 words long.
+// push the starting word in queue
+// now iterate on this , try to change with every char
+int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
+        map<string,int> mp;
+        for(int i=0;i<wordList.size();i++) mp[wordList[i]]++;
+        queue<string> q;
+        q.push(beginWord);
+        if(mp.find(endWord)==mp.end()) return 0;
+        int ans=0;
+        while(!q.empty()){
+            ans++;
+            int size=q.size();
+            while(size--){
+                string cur=q.front();
+                q.pop();
+                for(int i=0;i<cur.length();i++){
+                    string temp=cur;
+                    for(int j=0;j<26;j++){
+                        temp[i]=j+'a';
+                        if(mp.find(temp)==mp.end()) continue;
+                        if(temp==endWord) return ans+1;
+                        q.push(temp);
+                        mp.erase(temp);
+                    }
+                }
+            }
+        }
+        return 0;
+    }
