@@ -5357,3 +5357,229 @@ int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
         }
         return 0;
     }
+
+
+
+
+int climbStairs(int n) {
+        // if(n<0) return 0;
+        // if(n==0) return 1;
+        // if(n==1) return 1;
+        // return climbStairs(n-1)+climbStairs(n-2);
+        vector<int> dp(n+1,-1);
+        dp[0]=1;
+        dp[1]=1;
+        for(int i=2;i<=n;i++){
+            dp[i]=dp[i-1]+dp[i-2];
+        }
+        return dp[n];
+    }
+
+
+
+// when number is even , number of set bit is same as number of set bit in half of the number
+    // when number is odd , nuber of set bit is prev +1 -> prev=(i-1)/2+1 ==>i/2+1(for odd)
+    vector<int> countBits(int n) {
+        vector<int> dp(n+1);
+        dp[0]=0;
+        for(int i=1;i<=n;i++){
+            if(i&1){
+                // dp[i]=dp[i/2]+1;
+                dp[i]=dp[i-1]+1;
+            }
+            else dp[i]=dp[i/2];
+        }
+        return dp;
+    }
+
+
+
+// dp
+// tabulation -> bottom up
+// memoization -> top down
+
+// fibonacci (dp)
+// tc=n,sc=n
+// tabulation -> bottom up (try go from the base case)
+// space optimized
+// prev and prev2
+for(int i=2;i<=n;i++){
+    cur=prev+prev2;
+    prev2=prev;
+    prev=cur;
+}
+ans =prev;
+
+// try represent problem in terms of index
+// do all possible stuffs on that index acc. to problem
+// sum of all suffs -> count all ways
+// min (of all stuffs) -> minimmum
+
+
+
+// can't rob continuout houses
+int rob(vector<int>& nums) {
+        int prev=nums[0];
+        int prev2=0;
+        for(int i=1;i<nums.size();i++){
+            int cur=max(prev2+nums[i],prev);
+            prev2=prev;
+            prev=cur;
+        }
+        return prev;
+    }
+
+
+
+// first and last are adjacent
+// first and last will not be together
+    // leave the last and then leave the first , max of both
+    int rob(vector<int>& nums) {
+        if(nums.size()==1) return nums[0];
+        
+        int prev=nums[0];
+        int prev2=0;
+        for(int i=1;i<nums.size()-1;i++){
+            int cur=max(prev2+nums[i],prev);
+            prev2=prev;
+            prev=cur;
+        }
+        int ans1=prev;
+        
+        prev=nums[1];
+        prev2=0;
+        for(int i=2;i<nums.size();i++){
+            int cur=max(prev2+nums[i],prev);
+            prev2=prev;
+            prev=cur;
+        }
+        int ans2=prev;
+        
+        return max(ans1,ans2);
+    }
+
+
+
+
+// we are given a n length , we can cut it with x , y and z 
+// we have to maximize cuts
+int maximizeTheCuts(int n, int x, int y, int z)
+    {
+        int dp[n+1];
+        memset(dp,-1,sizeof dp);
+        dp[0]=0;
+        for(int i=1;i<=n;i++){
+            if(i>=x && dp[i-x]!=-1){ // check if i>=x and can we cut i-x (dp[i-x])
+                dp[i]=max(dp[i],1+dp[i-x]);
+            }
+            if(i>=y && dp[i-y]!=-1){
+                dp[i]=max(dp[i],1+dp[i-y]);
+            }
+            if(i>=z && dp[i-z]!=-1){
+                dp[i]=max(dp[i],1+dp[i-z]);
+            }
+        }
+        return dp[n]<=0?0:dp[n];
+    }
+
+
+
+
+int solve(int *arr,int ind,vector<int> &dp){
+        if(ind<0) return 0;
+        if(dp[ind]!=-1) return dp[ind];
+        int pick=arr[ind]+solve(arr,ind-2,dp);
+        int notpick=solve(arr,ind-1,dp);
+        return dp[ind]=max(pick,notpick);
+    }
+    int findMaxSum(int *arr, int n) {
+       // vector<int> dp(n+1,-1);
+       // return solve(arr,n-1,dp
+       
+       // dp[0]=0;
+       // dp[1]=arr[0];
+       // for(int i=2;i<=n;i++){
+       //     dp[i]=max(dp[i-2]+arr[i-1],dp[i-1]);
+       // }
+       // return dp[n];
+       
+       int prev=arr[0];
+       int prev2=0;
+       for(int i=2;i<=n;i++){
+           int cur=max(prev2+arr[i-1],prev);
+           prev2=prev;
+           prev=cur;
+       }
+       return prev;
+       
+    }
+
+
+
+
+// day cross task matrix is given can't perform same task in consecutive days
+int ninjaTraining(int n, vector < vector < int > > & points) {
+
+  vector < vector < int > > dp(n, vector < int > (4, 0));
+
+  dp[0][0] = max(points[0][1], points[0][2]);
+  dp[0][1] = max(points[0][0], points[0][2]);
+  dp[0][2] = max(points[0][0], points[0][1]);
+  dp[0][3] = max(points[0][0], max(points[0][1], points[0][2]));
+
+  for(int day = 1; day < n; day++) {
+    for(int last = 0; last < 4; last++) {
+      dp[day][last] = 0;
+      for(int task = 0; task <= 2; task++) {
+        if(task!=last){
+          int activity = points[day][task] + dp[day - 1][task];
+          dp[day][last] = max(dp[day][last], activity);
+        }
+      }
+    }
+  }
+  return dp[n - 1][3];
+}
+
+
+
+
+// given a vector of strings , we have to tell largest number of stings in which there are atmost m 0's and n 1's
+// we have two options to include the current string in ans or not 
+    vector<vector<vector<int>>> dp;
+    int countZeros(vector<string> &strs,int index){
+        int count=0;
+        for(int i=0;i<strs[index].size();i++){
+            if(strs[index][i]=='0') count++;
+        }
+        return count;
+    }
+    int solve(int index,int m,int n,vector<string>& strs){
+        if(index==strs.size()) return 0;
+        if(dp[index][m][n]!=-1) return dp[index][m][n];
+        int zeros=countZeros(strs,index);
+        int ones=strs[index].size()-zeros;
+        if(m>=zeros && n>=ones)
+            return dp[index][m][n]=max(1+solve(index+1,m-zeros,n-ones,strs),solve(index+1,m,n,strs));
+        else return dp[index][m][n]=solve(index+1,m,n,strs);
+    }
+    int findMaxForm(vector<string>& strs, int m, int n) {
+        dp.resize(strs.size()+1,vector<vector<int>>(m+1,vector<int> (n+1)));
+        // return solve(0,m,n,strs);
+        for(int i=1;i<=strs.size();i++){
+            int zeros=countZeros(strs,i-1);
+            int ones=strs[i-1].size()-zeros;
+            for(int j=0;j<=m;j++){
+                for(int k=0;k<=n;k++){
+                    if(j>=zeros && k>=ones)
+                    dp[i][j][k]=max(1+dp[i-1][j-zeros][k-ones],dp[i-1][j][k]);
+                    else dp[i][j][k]=dp[i-1][j][k];
+                }
+            }
+        }
+        return dp[strs.size()][m][n];
+    }
+
+
+
+
