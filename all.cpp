@@ -5583,3 +5583,236 @@ int ninjaTraining(int n, vector < vector < int > > & points) {
 
 
 
+
+// after reaching n-1,n-1 , we can again go to 0,0
+    // it is same as two person goint to end
+    // i1,j1,i2,j2 => i1+j1=i2+j2  =>  dp[i][j1][j2]
+    int solve(int i,int j1,int j2,vector<vector<int>> &grid,vector<vector<vector<int>>> &dp){
+        int i1=i;
+        int i2=i1+j1-j2;
+        if(i>=grid.size() || i2>=grid.size() || j1>=grid[0].size() || j2>=grid[0].size()) return -1e8;
+        if(grid[i1][j1]==-1 || grid[i2][j2]==-1) return INT_MIN;
+        if(i1==grid.size()-1 && j1==grid.size()-1) return grid[i][j1];
+        if(dp[i][j1][j2]!=-1) return dp[i][j1][j2];
+        int ans=0;
+        if(j1==j2 && i1==i2) ans+=grid[i][j1];
+        else ans+=grid[i1][j1]+grid[i2][j2];
+        int value=max(solve(i+1,j1,j2,grid,dp),solve(i+1,j1,j2+1,grid,dp));
+        value=max(value,solve(i,j1+1,j2+1,grid,dp));
+        value=max(value,solve(i,j1+1,j2,grid,dp));
+        ans+=value;
+        return dp[i][j1][j2]=ans;
+    }
+    int cherryPickup(vector<vector<int>>& grid) {
+        int n=grid.size();
+        vector<vector<vector<int>>> dp(n,vector<vector<int>>(n,vector<int>(n,-1)));
+        return max(0,solve(0,0,0,grid,dp));
+    }
+
+
+
+
+
+// i (row will be same for both)
+    int solve(int i,int j1,int j2,vector<vector<int>> &grid,vector<vector<vector<int>>> &dp){
+        if(j1<0 || j2<0 || j1>=grid[0].size() || j2>=grid[0].size()){
+            return -1e8;
+        }
+        if(i==grid.size()-1){
+            if(j1==j2){
+                return grid[i][j1];
+            }
+            else return grid[i][j1]+grid[i][j2];
+        }
+        if(dp[i][j1][j2]!=-1) return dp[i][j1][j2];
+        int maxi=INT_MIN;
+        for(int dj1=-1;dj1<=+1;dj1++){
+            for(int dj2=-1;dj2<=+1;dj2++){
+                int value=0;
+                if(j1==j2) value+=grid[i][j1];
+                else value+=grid[i][j1]+grid[i][j2];
+                value+=solve(i+1,j1+dj1,j2+dj2,grid,dp);
+                maxi=max(maxi,value);
+            }
+        }
+        return dp[i][j1][j2]=maxi;
+    }
+    int cherryPickup(vector<vector<int>>& grid) {
+        int n=grid.size();
+        int m=grid[0].size();
+        vector<vector<vector<int>>> dp(n,vector<vector<int>>(m,vector<int>(m,-1)));
+        return solve(0,0,m-1,grid,dp);
+    }
+
+
+
+
+
+int findLength(vector<int>& nums1, vector<int>& nums2) {
+        int n=nums1.size();
+        int m=nums2.size();
+        vector<vector<int>> dp(n+1,vector<int>(m+1,0));
+        int ans=0;
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=m;j++){
+                if(nums1[i-1]==nums2[j-1]){
+                    dp[i][j]=1+dp[i-1][j-1];
+                    ans=max(ans,dp[i][j]);
+                }
+            }
+        }
+        return ans;
+    }
+
+
+
+
+int solve(int i,int j,vector<vector<int>> &matrix,vector<vector<int>> &dp){
+        if(i<0 || j<0 || j>=matrix.size()) return 1e9;
+        if(i==0) return matrix[i][j];
+        if(dp[i][j]!=-1) return dp[i][j];
+        int up=solve(i-1,j,matrix,dp);
+        int ld=solve(i-1,j-1,matrix,dp);
+        int rd=solve(i-1,j+1,matrix,dp);
+        return dp[i][j]=matrix[i][j]+min(up,min(ld,rd));
+    }
+    int minFallingPathSum(vector<vector<int>>& matrix) {
+        int n=matrix.size();
+        vector<vector<int>> dp(n,vector<int> (n,-1));
+        // int ans=INT_MAX;
+        // for(int i=0;i<n;i++){
+        //     ans=min(ans,solve(n-1,i,matrix,dp));
+        // }
+        // return ans;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                if(i==0) dp[i][j]=matrix[i][j];
+                else{
+                    int up=1e9;
+                    int ld=1e9;
+                    int rd=1e9;
+                    up=dp[i-1][j];
+                    if(j>0) ld=dp[i-1][j-1];
+                    if(j<n-1) rd=dp[i-1][j+1];
+                    dp[i][j]=matrix[i][j]+min(up,min(ld,rd));
+                }
+            }
+        }
+        return *min_element(dp[n-1].begin(),dp[n-1].end());
+    }
+
+
+
+int solve(int i,int j,vector<vector<int>> &grid,vector<vector<int>> &dp){
+        if(i==0 && j==0) return grid[0][0];
+        if(i<0 || j<0) return 1e9;
+        if(dp[i][j]!=-1) return dp[i][j];
+        return dp[i][j]=grid[i][j]+min(solve(i-1,j,grid,dp),solve(i,j-1,grid,dp));
+    }
+    int minPathSum(vector<vector<int>>& grid) {
+        int n=grid.size();
+        int m=grid[0].size();
+        vector<vector<int>> dp(n,vector<int> (m,-1));
+        // return solve(n-1,m-1,grid,dp);
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(i==0 && j==0) dp[0][0]=grid[0][0];
+                else{
+                    int left=1e9;
+                    int up=1e9;
+                    if(i>0) up=dp[i-1][j];
+                    if(j>0) left=dp[i][j-1];
+                    dp[i][j]=grid[i][j]+min(up,left);
+                }
+            }
+        }
+        return dp[n-1][m-1];
+    }
+
+
+
+// is there a subset which add up to target
+f(ind ,target){
+    if(target==0) return true;
+    if(ind==0) return (a[0]==target);
+    bool notTake=f(ind-1,target);
+    bool take=false;
+    if(a[ind]<=target) take=f(ind-1,target-a[i]);
+    return take||notTake;
+}
+
+
+
+int solve(int i,int j,vector<vector<int>> &triangle,vector<vector<int>> &dp){
+        if(i==triangle.size()-1) return triangle[i][j];
+        if(dp[i][j]!=-1) return dp[i][j];
+        return dp[i][j]=triangle[i][j]+min(solve(i+1,j,triangle,dp),solve(i+1,j+1,triangle,dp));
+    }
+    int minimumTotal(vector<vector<int>>& triangle) {
+        vector<vector<int>> dp(triangle.size(),vector<int>(triangle.size(),-1));
+        // return solve(0,0,triangle,dp);
+        int n=triangle.size();
+        for(int i=n-1;i>=0;i--){
+            for(int j=0;j<triangle[i].size();j++){
+                if(i==n-1) dp[i][j]=triangle[i][j];
+                else{
+                    dp[i][j]=triangle[i][j]+min(dp[i+1][j],dp[i+1][j+1]);
+                }
+            }
+        }
+        return dp[0][0];
+    }
+
+
+
+
+
+int solve(int i,int j,vector<vector<int>> &dp){
+        if(i==0 && j==0) return 1;
+        if(i<0 || j<0) return 0;
+        if(dp[i][j]!=-1) return dp[i][j];
+        int up=solve(i-1,j,dp);
+        int left=solve(i,j-1,dp);
+        return dp[i][j]=left+up;
+    }
+    int uniquePaths(int m, int n) {
+        vector<vector<int>> dp(m,vector<int>(n,-1));
+        // return solve(m-1,n-1,dp);
+        for(int i=0;i<m;i++){
+            for(int j=0;j<n;j++){
+                if(i==0 && j==0) dp[0][0]=1;
+                else{
+                    int up=0;
+                    int left=0;
+                    if(i>0) up=dp[i-1][j];
+                    if(j>0) left=dp[i][j-1];
+                    dp[i][j]=left+up;
+                }
+                
+            }
+        }
+        return dp[m-1][n-1];
+    }
+
+
+
+int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
+        int n=obstacleGrid.size();
+        int m=obstacleGrid[0].size();
+        vector<vector<int>> dp(n,vector<int>(m,0));
+        if(obstacleGrid[0][0]==1) return 0;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(i==0 && j==0) dp[i][j]=1;
+                else if(obstacleGrid[i][j]==1) dp[i][j]=0;
+                else{
+                    int left=0;
+                    int up=0;
+                    if(i>0) up=dp[i-1][j];
+                    if(j>0) left=dp[i][j-1];
+                    dp[i][j]=up+left;
+                }
+            }
+        }
+        return dp[n-1][m-1];
+    }
