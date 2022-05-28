@@ -5816,3 +5816,404 @@ int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
         }
         return dp[n-1][m-1];
     }
+
+
+
+
+int solve(int index,int w,int wt[],int val[],vector<vector<int>> &dp){
+        if(index==0){
+            if(wt[index]<=w) return val[index];
+            else return 0;
+        }
+        if(dp[index][w]!=-1) return dp[index][w];
+        int notTake=solve(index-1,w,wt,val,dp);
+        int take=INT_MIN;
+        if(w>=wt[index]) take=val[index]+solve(index-1,w-wt[index],wt,val,dp);
+        return dp[index][w]=max(take,notTake);
+    }
+    int knapSack(int W, int wt[], int val[], int n) 
+    { 
+        vector<vector<int>> dp(n,vector<int>(W+1,0));
+    //   return solve(n-1,W,wt,val,dp);
+        for(int i=wt[0];i<=W;i++) dp[0][i]=val[0];
+        for(int i=1;i<n;i++){
+            for(int j=1;j<=W;j++){
+                int notTake=dp[i-1][j];
+                int take=INT_MIN;
+                if(j>=wt[i]) take=val[i]+dp[i-1][j-wt[i]];
+                dp[i][j]=max(take,notTake);
+            }
+        }
+        return dp[n-1][W];
+    }
+
+
+
+
+
+
+int solve(int index,int amount,vector<int> &coins,vector<vector<int>> &dp){
+        if(index==0){
+            if(amount%coins[index]==0) return amount/coins[index];
+            else return 1e9;
+        }
+        if(dp[index][amount]!=-1) return dp[index][amount];
+        int notTake=solve(index-1,amount,coins,dp);
+        int take=1e9;
+        if(amount>=coins[index]) take=1+solve(index,amount-coins[index],coins,dp);
+        return dp[index][amount]=min(take,notTake);
+    }
+    int coinChange(vector<int>& coins, int amount) {
+        int n=coins.size();
+        vector<vector<int>> dp(n,vector<int>(amount+1,0));
+        // int ans=solve(n-1,amount,coins,dp);
+        // if(ans==1e9) return -1;
+        // else return ans;
+        for(int i=0;i<=amount;i++){
+            if(i%coins[0]==0){
+                dp[0][i]=i/coins[0];
+            }
+            else dp[0][i]=1e9;
+        }
+        for(int i=1;i<n;i++){
+            for(int j=1;j<=amount;j++){
+                int notTake=dp[i-1][j];
+                int take=1e9;
+                if(j>=coins[i]) take=1+dp[i][j-coins[i]];
+                dp[i][j]=min(take,notTake);
+            }
+        }
+        return dp[n-1][amount]==1e9?-1:dp[n-1][amount];
+    }
+
+
+
+
+int solve(int index,int amount,vector<int> &coins,vector<vector<int>> &dp){
+        if(index==0){
+            if(amount%coins[index]==0) return 1;
+            else return 0;
+        }
+        if(dp[index][amount]!=-1) return dp[index][amount];
+        int notTake=solve(index-1,amount,coins,dp);
+        int take=0;
+        if(amount>=coins[index]) take=solve(index,amount-coins[index],coins,dp);
+        return dp[index][amount]=take+notTake;
+    }
+    int change(int amount, vector<int>& coins) {
+        int n=coins.size();
+        vector<vector<int>> dp(n,vector<int>(amount+1,0));
+        // return solve(n-1,amount,coins,dp);
+        for(int i=0;i<=amount;i++){
+            if(i%coins[0]==0) dp[0][i]=1;
+        }
+        for(int i=1;i<n;i++){
+            for(int j=0;j<=amount;j++){
+                int notTake=dp[i-1][j];
+                int take=0;
+                if(j>=coins[i]) take=dp[i][j-coins[i]];
+                dp[i][j]=take+notTake;
+            }
+        }
+        return dp[n-1][amount];
+    }
+
+
+
+
+int countSquares(vector<vector<int>>& matrix) {
+        int n=matrix.size();
+        int m=matrix[0].size();
+        vector<vector<int>> dp(n,vector<int>(m,0));
+        int ans=0;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(i==0 || j==0){
+                    dp[i][j]=matrix[i][j];
+                }
+                else{
+                    if(matrix[i][j]==0){
+                        dp[i][j]=0;
+                    }
+                    else{
+                        dp[i][j]=1+min(dp[i-1][j],min(dp[i-1][j-1],dp[i][j-1]));
+                    }
+                }
+                ans+=dp[i][j];
+            }
+        }
+        return ans;
+    }
+
+
+
+
+int countPartitionsUtil(int ind, int target, vector<int>& arr, vector<vector
+<int>> &dp){
+
+     if(ind == 0){
+        if(target==0 && arr[0]==0)
+            return 2;
+        if(target==0 || target == arr[0])
+            return 1;
+        return 0;
+    }
+    
+    if(dp[ind][target]!=-1)
+        return dp[ind][target];
+        
+    int notTaken = countPartitionsUtil(ind-1,target,arr,dp);
+    
+    int taken = 0;
+    if(arr[ind]<=target)
+        taken = countPartitionsUtil(ind-1,target-arr[ind],arr,dp);
+        
+    return dp[ind][target]= (notTaken + taken)%mod;
+}
+
+int countPartitions(int d, vector<int>& arr){
+    int n = arr.size();
+    int totSum = 0;
+    for(int i=0; i<arr.size();i++){
+        totSum += arr[i];
+    }
+    
+    //Checking for edge cases
+    if(totSum-d<0) return 0;
+    if((totSum-d)%2==1) return 0;
+    
+    int s2 = (totSum-d)/2;
+    
+    vector<vector<int>> dp(n,vector<int>(s2+1,-1));
+    return countPartitionsUtil(n-1,s2,arr,dp);
+}
+
+
+
+int numDecodings(string s) {
+        vector<int> dp(s.length()+1);
+        if(s[0]=='0') return 0;
+        dp[0]=1;
+        dp[1]=1;
+        for(int i=2;i<=s.length();i++){
+            if(s[i-1]>='1' && s[i-1]<='9') dp[i]=dp[i-1];
+            if(s[i-2]=='1') dp[i]+=dp[i-2];
+            else if(s[i-2]=='2' && (s[i-1]>='0' && s[i-1]<='6')) dp[i]+=dp[i-2];
+        }
+        return dp[s.length()];
+    }
+
+
+
+
+int solve(int index1,int index2,string &text1,string &text2,vector<vector<int>> &dp){
+        if(index1<0 || index2<0) return 0;
+        if(dp[index1][index2]!=-1) return dp[index1][index2];
+        if(text1[index1]==text2[index2]) return dp[index1][index2]=1+solve(index1-1,index2-1,text1,text2,dp);
+        else{
+            return dp[index1][index2]=max(solve(index1-1,index2,text1,text2,dp),solve(index1,index2-1,text1,text2,dp));
+        }
+    }
+    int longestCommonSubsequence(string text1, string text2) {
+        int n=text1.size();
+        int m=text2.size();
+        // vector<vector<int>> dp(n,vector<int>(m,-1));
+        // return solve(n-1,m-1,text1,text2,dp);
+        vector<vector<int>> dp(n+1,vector<int>(m+1,0));
+        for(int i=0;i<=m;i++) dp[0][i]=0;
+        for(int i=0;i<=n;i++) dp[i][0]=0;
+        
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=m;j++){
+                if(text1[i-1]==text2[j-1]) dp[i][j]=1+dp[i-1][j-1];
+                else dp[i][j]=max(dp[i-1][j],dp[i][j-1]);
+            }
+        }
+        return dp[n][m];                              
+    }
+
+
+
+
+int maximalSquare(vector<vector<char>>& matrix) {
+        int n=matrix.size();
+        int m=matrix[0].size();
+        vector<vector<int>> dp(n,vector<int>(m,-1));
+        int ans=0;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(i==0 || j==0){
+                    dp[i][j]=matrix[i][j]-'0';
+                }
+                else{
+                    if(matrix[i][j]=='0'){
+                        dp[i][j]=0;
+                    }
+                    else{
+                        dp[i][j]=1+min(dp[i-1][j],min(dp[i-1][j-1],dp[i][j-1]));
+                    }
+                }
+                ans=max(ans,dp[i][j]);
+            }
+        }
+        return ans*ans;
+    }
+
+
+
+
+// last row stores is using all elements we can make a sum or not
+    int minDifference(int arr[], int n){ 
+        int sum=accumulate(arr,arr+n,0);
+        vector<vector<bool>> dp(n,vector<bool>(sum,false));
+        for(int i=0;i<n;i++) dp[i][0]=true;
+        for(int i=1;i<n;i++){
+            for(int j=1;j<=sum;j++){
+                bool notTake=dp[i-1][j];
+                bool take=false;
+                if(j>=arr[i]) take=dp[i-1][j-arr[i]];
+                dp[i][j]=take||notTake;
+            }
+        }
+        int ans=INT_MAX;
+        for(int i=0;i<=sum;i++){
+            if(dp[n-1][i]==true){
+                int s1=i;
+                int s2=sum-s1;
+                ans=min(ans,abs(s1-s2));
+            }
+        }
+        return ans;
+    } 
+
+
+
+
+bool canPartition(vector<int>& nums) {
+        int sum=accumulate(nums.begin(),nums.end(),0);
+        if(sum&1) return false;
+        sum=sum/2;
+        vector<vector<bool>> dp(nums.size(),vector<bool>(sum+1,false));
+        for(int i=0;i<=sum;i++) dp[0][i]=false;
+        for(int i=0;i<nums.size();i++) dp[i][0]=true;
+        for(int i=1;i<nums.size();i++){
+            for(int j=1;j<=sum;j++){
+                bool notTake=dp[i-1][j];
+                bool take=false;
+                if(j>=nums[i]) take=dp[i-1][j-nums[i]];
+                dp[i][j]=take||notTake;
+            }
+        }
+        return dp[nums.size()-1][sum];
+    }
+
+
+
+
+int solve(int index,int sum,int arr[],vector<vector<int>> &dp){
+        if(index<0){
+            if(sum==0) return 1;
+            else return 0;
+        }
+        if(dp[index][sum]!=-1) return dp[index][sum];
+        int notPick=solve(index-1,sum,arr,dp);
+        int pick=0;
+        if(arr[index]<=sum) pick=solve(index-1,sum-arr[index],arr,dp);
+        return dp[index][sum]=(pick+notPick)%1000000007;
+    }
+    int perfectSum(int arr[], int n, int sum)
+    {
+        vector<vector<int>> dp(n,vector<int>(sum+1,-1));
+        return solve(n-1,sum,arr,dp);
+        // for(int i=0;i<n;i++) dp[i][0]=1;
+        // if(arr[0]<=sum) dp[0][arr[0]]=1;
+        // for(int i=1;i<n;i++){
+        //     for(int j=0;j<=sum;j++){
+        //         int notPick=dp[i-1][j];
+        //         int pick=0;
+        //         if(j>=arr[i]) pick=dp[i-1][j-arr[i]];
+        //         dp[i][j]=pick+notPick;
+        //     }
+        // }
+        // return dp[n-1][sum];
+    }
+
+
+
+
+// try to pick lengths and sum them up to make the given n 
+    // unbounded knapsack
+    int knapSack(int N, int W, int val[], int wt[])
+    {
+        vector<vector<int>> dp(N,vector<int>(W+1,0));
+        for(int i=0;i<=W;i++) dp[0][i]=(i/wt[0])*val[0];
+        for(int i=1;i<N;i++){
+            for(int j=0;j<=W;j++){
+                int notTake=dp[i-1][j];
+                int take=INT_MIN;
+                if(j>=wt[i]) take=val[i]+dp[i][j-wt[i]];
+                dp[i][j]=max(take,notTake);
+            }
+        }
+        return dp[N-1][W];
+    }
+    int cutRod(int price[], int n) {
+        int wt[n];
+        for(int i=0;i<n;i++) wt[i]=i+1;
+        return knapSack(n,n,price,wt);
+    }
+
+
+
+
+// two subset with difference target 
+    // s1-s2=target
+    // totalSum-s2-s2=target
+    int solve(int index,int target,vector<int> &nums,vector<vector<int>> &dp){
+        if(index<0){
+            if(target==0) return 1;
+            else return 0;
+        }
+        if(dp[index][target]!=-1) return dp[index][target];
+        int notTake=solve(index-1,target,nums,dp);
+        int take=0;
+        if(target>=nums[index]) take=solve(index-1,target-nums[index],nums,dp);
+        return dp[index][target]=take+notTake;
+    }
+    int findTargetSumWays(vector<int>& nums, int target) {
+        int n=nums.size();
+        int sum=accumulate(nums.begin(),nums.end(),0);
+        if(target>sum) return 0;
+        if((sum-target)%2==1) return 0;
+        vector<vector<int>> dp(n,vector<int> ((sum-target)/2+1,-1));
+        return solve(n-1,(sum-target)/2,nums,dp);
+    }
+
+
+
+
+int solve(int index,int w,int wt[],int val[],vector<vector<int>> &dp){
+        if(index==0){
+            return (w/wt[index])*val[index];
+        }
+        if(dp[index][w]!=-1) return dp[index][w];
+        int notTake=solve(index-1,w,wt,val,dp);
+        int take=INT_MIN;
+        if(w>=wt[index]) take=val[index]+solve(index,w-wt[index],wt,val,dp);
+        return dp[index][w]=max(take,notTake);
+    }
+    int knapSack(int N, int W, int val[], int wt[])
+    {
+        vector<vector<int>> dp(N,vector<int>(W+1,0));
+        // return solve(N-1,W,wt,val,dp);
+        for(int i=0;i<=W;i++) dp[0][i]=(i/wt[0])*val[0];
+        for(int i=1;i<N;i++){
+            for(int j=0;j<=W;j++){
+                int notTake=dp[i-1][j];
+                int take=INT_MIN;
+                if(j>=wt[i]) take=val[i]+dp[i][j-wt[i]];
+                dp[i][j]=max(take,notTake);
+            }
+        }
+        return dp[N-1][W];
+    }
