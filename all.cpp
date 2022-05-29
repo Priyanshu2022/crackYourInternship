@@ -6217,3 +6217,460 @@ int solve(int index,int w,int wt[],int val[],vector<vector<int>> &dp){
         }
         return dp[N-1][W];
     }
+
+
+
+int maxProfit(vector<int>& prices) {
+        int mini=prices[0];
+        int ans=0;
+        for(int i=1;i<prices.size();i++){
+            ans=max(ans,prices[i]-mini);
+            mini=min(mini,prices[i]);
+        }
+        return ans;
+    }
+
+
+
+
+// we are currently standing on a index we can buy are allowed to buy , or do nothing elsse sell or do nothing
+    int solve(int index,bool buy,vector<int>& prices,vector<vector<int>> &dp){
+        if(index==prices.size()) return 0;
+        if(dp[index][buy]!=-1) return dp[index][buy];
+        if(buy){
+            return dp[index][buy]=max(-prices[index]+solve(index+1,0,prices,dp),solve(index+1,1,prices,dp));
+        }
+        else{
+            return dp[index][buy]=max(prices[index]+solve(index+1,1,prices,dp),solve(index+1,0,prices,dp));
+        }
+    }
+    int maxProfit(vector<int>& prices) {
+        int n=prices.size();
+        // vector<vector<int>> dp(prices.size()+1,vector<int>(2,0));
+        // // return solve(0,1,prices,dp);
+        // dp[n][0]=dp[n][1]=0;
+        // for(int i=n-1;i>=0;i--){
+        //     for(int j=0;j<=1;j++){
+        //         if(j) dp[i][j]=max(-prices[i]+dp[i+1][0],dp[i+1][1]);
+        //         else dp[i][j]=max(prices[i]+dp[i+1][1],dp[i+1][0]);
+        //     }
+        // }
+        // return dp[0][1];
+        vector<int> ahead(2,0),cur(2,0);
+        for(int i=n-1;i>=0;i--){
+            for(int j=0;j<=1;j++){
+                if(j) cur[j]=max(-prices[i]+ahead[0],ahead[1]);
+                else cur[j]=max(prices[i]+ahead[1],ahead[0]);
+            }
+            ahead=cur;
+        }
+        return cur[1];
+    }
+
+
+
+// or n*4 (Buy sell buy sell)
+    int solve(int index,int buy,int cap,vector<int> &prices,vector<vector<vector<int>>> &dp){
+        if(cap==0) return 0;
+        if(index==prices.size()) return 0;
+        if(dp[index][buy][cap]!=-1) return dp[index][buy][cap];
+        if(buy){
+            return dp[index][buy][cap]=max(-prices[index]+solve(index+1,0,cap,prices,dp),solve(index+1,1,cap,prices,dp));
+        }
+        else{
+            return dp[index][buy][cap]=max(+prices[index]+solve(index+1,1,cap-1,prices,dp),solve(index+1,0,cap,prices,dp));
+        }
+    }
+    int maxProfit(vector<int>& prices) {
+        int n=prices.size();
+        // vector<vector<vector<int>>> dp(n,vector<vector<int>>(2,vector<int>(3,-1)));
+        // return solve(0,1,2,prices,dp);
+        vector<vector<vector<int>>> dp(n+1,vector<vector<int>>(2,vector<int>(3,0)));
+        for(int i=n-1;i>=0;i--){
+            for(int j=0;j<=1;j++){
+                for(int k=1;k<=2;k++){
+                    if(j) dp[i][j][k]=max(-prices[i]+dp[i+1][0][k],dp[i+1][1][k]);
+                    else dp[i][j][k]=max(+prices[i]+dp[i+1][1][k-1],dp[i+1][0][k]);
+                }
+            }
+        }
+        return dp[0][1][2];
+    }
+
+
+
+
+int solve(int i,int tranNo,vector<int>& prices,int n,int k,vector<vector<int>> &dp){
+        if(i==n || tranNo==2*k) return 0;
+        if(dp[i][tranNo]!=-1) return dp[i][tranNo];
+        if(tranNo%2==0) return dp[i][tranNo]=max(-prices[i]+solve(i+1,tranNo+1,prices,n,k,dp),solve(i+1,tranNo,prices,n,k,dp));
+        else return dp[i][tranNo]=max(+prices[i]+solve(i+1,tranNo+1,prices,n,k,dp),solve(i+1,tranNo,prices,n,k,dp));
+    }
+    int maxProfit(int k, vector<int>& prices) {
+        int n=prices.size();
+        // vector<vector<int>> dp(n,vector<int>(2*k,-1));
+        // return solve(0,0,prices,n,k,dp);
+        vector<vector<int>> dp(n+1,vector<int>(2*k+1,0));
+        for(int i=n-1;i>=0;i--){
+            for(int j=2*k-1;j>=0;j--){
+                if(j%2==0) dp[i][j]=max(-prices[i]+dp[i+1][j+1],dp[i+1][j]);
+                else dp[i][j]=max(prices[i]+dp[i+1][j+1],dp[i+1][j]);
+            }
+        }
+        return dp[0][0];
+        
+        // int n=prices.size();
+        // vector<vector<vector<int>>> dp(n+1,vector<vector<int>>(2,vector<int>(k+1,0)));
+        // for(int i=n-1;i>=0;i--){
+        //     for(int j=0;j<=1;j++){
+        //         for(int l=1;l<=k;l++){
+        //             if(j) dp[i][j][l]=max(-prices[i]+dp[i+1][0][l],dp[i+1][1][l]);
+        //             else dp[i][j][l]=max(+prices[i]+dp[i+1][1][l-1],dp[i+1][0][l]);
+        //         }
+        //     }
+        // }
+        // return dp[0][1][k];
+    }
+
+
+
+
+
+int solve(int index,int buy,vector<int> &prices,vector<vector<int>> &dp){
+        if(index>=prices.size()) return 0;
+        if(dp[index][buy]!=-1) return dp[index][buy];
+        if(buy){
+            return dp[index][buy]=max(-prices[index]+solve(index+1,0,prices,dp),solve(index+1,1,prices,dp));
+        }
+        else  return dp[index][buy]=max(+prices[index]+solve(index+2,1,prices,dp),solve(index+1,0,prices,dp));
+    }
+    int maxProfit(vector<int>& prices) {
+        int n=prices.size();
+        vector<vector<int>> dp(n+2,vector<int> (2,0));
+        // return solve(0,1,prices,dp);
+        for(int i=n-1;i>=0;i--){
+            for(int j=0;j<=1;j++){
+                if(j) dp[i][j]=max(-prices[i]+dp[i+1][0],dp[i+1][1]);
+                else dp[i][j]=max(prices[i]+dp[i+2][1],dp[i+1][0]);
+            }
+        }
+        return dp[0][1];
+    }
+
+
+
+
+
+int maxProfit(vector<int>& prices, int fee) {
+        int n=prices.size();
+        vector<int> ahead(2,0),cur(2,0);
+        for(int i=n-1;i>=0;i--){
+            for(int j=0;j<=1;j++){
+                if(j) cur[j]=max(-prices[i]-fee+ahead[0],ahead[1]);
+                else cur[j]=max(prices[i]+ahead[1],ahead[0]);
+            }
+            ahead=cur;
+        }
+        return cur[1];
+    }
+
+
+
+
+int solve(int i,int j,string &word1,string &word2,vector<vector<int>> &dp){
+        if(i<0){
+            return j+1;
+        }
+        if(j<0){
+            return i+1;
+        }
+        if(dp[i][j]!=-1) return dp[i][j];
+        if(word1[i]==word2[j]) return dp[i][j]=solve(i-1,j-1,word1,word2,dp);
+        return dp[i][j]=min(1+solve(i-1,j,word1,word2,dp),1+solve(i,j-1,word1,word2,dp));
+    }
+    int minDistance(string word1, string word2) {
+        int n=word1.size();
+        int m=word2.size();
+        vector<vector<int>> dp(n,vector<int> (m,-1));
+        return solve(n-1,m-1,word1,word2,dp);
+    }
+
+
+
+
+int solve(int i,int j,string &s,string &t,vector<vector<int>> &dp){
+        if(j<0) return 1;
+        if(i<0) return 0;
+        if(dp[i][j]!=-1) return dp[i][j];
+        if(s[i]==t[j]) return dp[i][j]=solve(i-1,j,s,t,dp)+solve(i-1,j-1,s,t,dp);
+        else return dp[i][j]=solve(i-1,j,s,t,dp);
+    }
+    int numDistinct(string s, string t) {
+        int n=s.length();
+        int m=t.length();
+        // vector<vector<int>> dp(n,vector<int>(m,-1));
+        // return solve(n-1,m-1,s,t,dp);
+        vector<vector<double >> dp(n+1,vector<double>(m+1,0));
+        for(int i=0;i<=m;i++) dp[0][i]=0;
+        for(int i=0;i<=n;i++) dp[i][0]=1;
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=m;j++){
+                if(s[i-1]==t[j-1]) dp[i][j]=dp[i-1][j]+dp[i-1][j-1];
+                else dp[i][j]=dp[i-1][j];
+            }
+        }
+        return (int)dp[n][m];
+    }
+
+
+
+
+int solve(int i,int j,string &word1,string &word2,vector<vector<int>> &dp){
+        if(i<0) return j+1;
+        if(j<0) return i+1;
+        if(dp[i][j]!=-1) return dp[i][j];
+        if(word1[i]==word2[j]) return solve(i-1,j-1,word1,word2,dp);
+        int insertion=1+solve(i,j-1,word1,word2,dp);
+        int deletion=1+solve(i-1,j,word1,word2,dp);
+        int replace=1+solve(i-1,j-1,word1,word2,dp);
+        return dp[i][j]=min(insertion,min(deletion,replace));
+    }
+    int minDistance(string word1, string word2) {
+        int n=word1.length();
+        int m=word2.length();
+        // vector<vector<int>> dp(n,vector<int>(m,-1));
+        // return solve(n-1,m-1,word1,word2,dp);
+        vector<vector<int>> dp(n+1,vector<int> (m+1,0));
+        for(int i=0;i<=n;i++) dp[i][0]=i;
+        for(int j=0;j<=m;j++) dp[0][j]=j;
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=m;j++){
+                if(word1[i-1]==word2[j-1]) dp[i][j]=dp[i-1][j-1];
+                else{
+                    int insertion=1+dp[i][j-1];
+                    int deletion=1+dp[i-1][j];
+                    int replace=1+dp[i-1][j-1];
+                    dp[i][j]=min(insertion,min(deletion,replace));
+                }
+            }
+        }
+        return dp[n][m];
+    }
+
+
+
+
+int longestCommonSubstr (string s1, string s2, int n, int m)
+    {
+        vector<vector<int>> dp(n+1,vector<int>(m+1,-1));
+        for(int i=0;i<=n;i++) dp[i][0]=0;
+        for(int i=0;i<=m;i++) dp[0][i]=0;
+        int ans=INT_MIN;
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=m;j++){
+                if(s1[i-1]==s2[j-1]) dp[i][j]=dp[i-1][j-1]+1;
+                else dp[i][j]=0;
+                ans=max(ans,dp[i][j]);
+            }
+        }
+        return ans;
+    }
+
+
+
+
+int longestCommonSubsequence(string text1, string text2) {
+        int n=text1.size();
+        int m=text2.size();
+        vector<vector<int>> dp(n+1,vector<int>(m+1,0));
+        for(int i=0;i<=m;i++) dp[0][i]=0;
+        for(int i=0;i<=n;i++) dp[i][0]=0;
+        
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=m;j++){
+                if(text1[i-1]==text2[j-1]) dp[i][j]=1+dp[i-1][j-1];
+                else dp[i][j]=max(dp[i-1][j],dp[i][j-1]);
+            }
+        }
+        return dp[n][m];                              
+    }
+    int longestPalindromeSubseq(string s) {
+        string temp=s;
+        reverse(s.begin(),s.end());
+        return longestCommonSubsequence(s,temp);
+    }
+
+
+
+
+
+// length - lcs
+    // keeping the longest portion intact
+    int longestCommonSubsequence(string text1, string text2) {
+        int n=text1.size();
+        int m=text2.size();
+        vector<vector<int>> dp(n+1,vector<int>(m+1,0));
+        for(int i=0;i<=m;i++) dp[0][i]=0;
+        for(int i=0;i<=n;i++) dp[i][0]=0;
+        
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=m;j++){
+                if(text1[i-1]==text2[j-1]) dp[i][j]=1+dp[i-1][j-1];
+                else dp[i][j]=max(dp[i-1][j],dp[i][j-1]);
+            }
+        }
+        return dp[n][m];                              
+    }
+    int minInsertions(string s) {
+        string temp=s;
+        reverse(s.begin(),s.end());
+        return s.length()-longestCommonSubsequence(temp,s);
+    }
+
+
+
+
+    // deletions=n-lcs
+    // insertions=m-lcs
+    // total operations=n+m-2*lcs
+    int longestCommonSubsequence(string text1, string text2) {
+        int n=text1.size();
+        int m=text2.size();
+        vector<vector<int>> dp(n+1,vector<int>(m+1,0));
+        for(int i=0;i<=m;i++) dp[0][i]=0;
+        for(int i=0;i<=n;i++) dp[i][0]=0;
+        
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=m;j++){
+                if(text1[i-1]==text2[j-1]) dp[i][j]=1+dp[i-1][j-1];
+                else dp[i][j]=max(dp[i-1][j],dp[i][j-1]);
+            }
+        }
+        return dp[n][m];                              
+    }
+    int minOperations(string str1, string str2) 
+    { 
+        return str1.length()+str2.length()-2*longestCommonSubsequence(str1,str2);
+    }
+
+
+
+
+
+void lcs(string s1, string s2) {
+
+  int n = s1.size();
+  int m = s2.size();
+
+  vector < vector < int >> dp(n + 1, vector < int > (m + 1, 0));
+  for (int i = 0; i <= n; i++) {
+    dp[i][0] = 0;
+  }
+  for (int i = 0; i <= m; i++) {
+    dp[0][i] = 0;
+  }
+
+  for (int ind1 = 1; ind1 <= n; ind1++) {
+    for (int ind2 = 1; ind2 <= m; ind2++) {
+      if (s1[ind1 - 1] == s2[ind2 - 1])
+        dp[ind1][ind2] = 1 + dp[ind1 - 1][ind2 - 1];
+      else
+        dp[ind1][ind2] = 0 + max(dp[ind1 - 1][ind2], dp[ind1][ind2 - 1]);
+    }
+  }
+
+  int len = dp[n][m];
+  int i = n;
+  int j = m;
+
+  int index = len - 1;
+  string str = "";
+  for (int k = 1; k <= len; k++) {
+    str += "$"; // dummy string
+  }
+
+  while (i > 0 && j > 0) {
+    if (s1[i - 1] == s2[j - 1]) {
+      str[index] = s1[i - 1];
+      index--;
+      i--;
+      j--;
+    } else if (s1[i - 1] > s2[j - 1]) {
+      i--;
+    } else j--;
+  }
+  cout << str;
+}
+
+
+
+
+
+
+// n+m-lcs
+    // but we need to find the string
+    string shortestCommonSupersequence(string str1, string str2) {
+        int n=str1.length();
+        int m=str2.length();
+        vector<vector<int>> dp(n+1,vector<int> (m+1,0));
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=m;j++){
+                if(str1[i-1]==str2[j-1]) dp[i][j]=1+dp[i-1][j-1];
+                else dp[i][j]=max(dp[i][j-1],dp[i-1][j]);
+            }
+        }
+        string ans="";
+        int i=n,j=m;
+        while(i>0 && j>0){
+            if(str1[i-1]==str2[j-1]){
+                ans+=str1[i-1];
+                i--;
+                j--;
+            }
+            else if(dp[i-1][j]>dp[i][j-1]){
+                ans+=str1[i-1];
+                i--;
+            }
+            else{
+                ans+=str2[j-1];
+                j--;
+            }
+        }
+        while(i>0){
+            ans+=str1[i-1];
+            i--;
+        }
+        while(j>0){
+            ans+=str2[j-1];
+            j--;
+        }
+        reverse(ans.begin(),ans.end());
+        return ans;
+    }
+
+
+
+
+
+int solve(int i,int j,string &p,string &s,vector<vector<int>> &dp){
+        if(i<0 && j<0) return true;
+        if(i<0 && j>=0) return false;
+        if(j<0 && i>=0){
+            for(int k=0;k<=i;k++) if(p[k]!='*') return false;
+            return true;
+        }
+        if(dp[i][j]!=-1) return dp[i][j];
+        if(p[i]==s[i] || p[i]=='?') return dp[i][j]=solve(i-1,j-1,p,s,dp);
+        else if(p[i]=='*') return dp[i][j]=solve(i-1,j,p,s,dp)||solve(i,j-1,p,s,dp);
+        return false;
+    }
+    bool isMatch(string s, string p) {
+        int n=p.length();
+        int m=s.length();
+        vector<vector<int>> dp(n,vector<int>(m,-1));
+        return solve(n-1,m-1,p,s,dp);
+    }
+
+
+
+
