@@ -6674,3 +6674,361 @@ int solve(int i,int j,string &p,string &s,vector<vector<int>> &dp){
 
 
 
+
+// dp will be of i , j , what we want (true or false) and it will store no of ways
+    int solve(int i,int j,bool isTrue,string &s,vector<vector<vector<int>>> &dp){
+        if(i>j) return 0;
+        if(i==j){
+            if(isTrue) return s[i]=='T';
+            else return s[i]=='F';
+        }
+        if(dp[i][j][isTrue]!=-1) return dp[i][j][isTrue];
+        int ways=0;
+        for(int ind=i+1;ind<j;ind+=2){
+            int lT=solve(i,ind-1,1,s,dp);
+            int lF=solve(i,ind-1,0,s,dp);
+            int rT=solve(ind+1,j,1,s,dp);
+            int rF=solve(ind+1,j,0,s,dp);
+            if(s[ind]=='&'){
+                if(isTrue) ways+=(rT*lT)%1003;
+                else ways+=(lF*rF+lF*rT+lT*rF)%1003;
+            }
+            else if(s[ind]=='|'){
+                if(isTrue) ways+=(lT*rT+lF*rT+lT*rF)%1003;
+                else ways+=(lF*rF)%1003;
+            }
+            else{
+                if(isTrue) ways+=(lT*rF+lF*rT)%1003;
+                else ways+=(lF*rF+lT*rT)%1003;
+            }
+        }
+        return dp[i][j][isTrue]=ways%1003;
+    }
+    int countWays(int N, string S){
+        vector<vector<vector<int>>> dp(N,vector<vector<int>> (N,vector<int>(2,-1)));
+        return solve(0,N-1,1,S,dp);
+    }
+
+
+
+
+// think when balloon is left
+    int solve(int i,int j,vector<int>& nums,vector<vector<int>> &dp){
+        if(i>j) return 0;
+        if(dp[i][j]!=-1) return dp[i][j];
+        int maxi=INT_MIN;
+        for(int k=i;k<=j;k++){
+            int coins=nums[i-1]*nums[k]*nums[j+1]+solve(k+1,j,nums,dp)+solve(i,k-1,nums,dp);
+            maxi=max(maxi,coins);
+        }
+        return dp[i][j]=maxi;
+    }
+    int maxCoins(vector<int>& nums) {
+        int n=nums.size();
+        nums.push_back(1);
+        nums.insert(nums.begin(),1);
+        // vector<vector<int>> dp(n+1,vector<int> (n+1,-1));
+        // return solve(1,n,nums,dp);
+        vector<vector<int>> dp(n+2,vector<int> (n+2,0));
+        for(int i=n;i>=1;i--){
+            for(int j=1;j<=n;j++){
+                if(i>j) continue;
+                int maxi=INT_MIN;
+                for(int k=i;k<=j;k++){
+                    int coins=nums[i-1]*nums[k]*nums[j+1]+dp[k+1][j]+dp[i][k-1];
+                    maxi=max(maxi,coins);
+                }
+                dp[i][j]=maxi;
+            }
+        }
+        return dp[1][n];
+    }
+
+
+
+
+vector<int> largestDivisibleSubset(vector<int>& nums) {
+        int n=nums.size();
+        vector<int> dp(n,1),hash(n);
+        sort(nums.begin(),nums.end());
+        int maxi=1;
+        int lastIndex=0;
+        for(int i=0;i<n;i++){
+            hash[i]=i;
+            for(int j=0;j<i;j++){
+                if(nums[i]%nums[j]==0 && dp[j]+1>dp[i]){
+                    dp[i]=dp[j]+1;
+                    hash[i]=j;
+                }
+            }
+            if(dp[i]>maxi){
+                maxi=dp[i];
+                lastIndex=i;
+            }
+        }
+        vector<int> temp;
+        temp.push_back(nums[lastIndex]);
+        while(hash[lastIndex]!=lastIndex){
+            lastIndex=hash[lastIndex];
+            temp.push_back(nums[lastIndex]);
+        }
+        reverse(temp.begin(),temp.end());
+        return temp;
+    }
+
+
+
+
+int lengthOfLIS(vector<int>& nums) {
+        // vector<int> dp(nums.size(),1);
+        // for(int i=0;i<nums.size();i++){
+        //     for(int j=0;j<i;j++){
+        //         if(nums[i]>nums[j]) dp[i]=max(dp[i],dp[j]+1);
+        //     }
+        // }
+        // return *max_element(dp.begin(),dp.end());
+        vector<int> temp;// temporaty array is not the list , we are just storing elements
+        temp.push_back(nums[0]);
+        for(int i=1;i<nums.size();i++){
+            if(nums[i]>temp.back()){
+                temp.push_back(nums[i]);
+            }
+            else{
+                int ind=lower_bound(temp.begin(),temp.end(),nums[i])-temp.begin();
+                temp[ind]=nums[i];
+            }
+        }
+        return temp.size();
+    }
+
+
+
+
+
+int LongestBitonicSequence(vector<int>nums)
+    {
+        int n=nums.size();
+        vector<int> dp1(n,1);
+        for(int i=0;i<n;i++){
+            for(int j=0;j<i;j++){
+                if(nums[i]>nums[j] && dp1[i]<dp1[j]+1){
+                    dp1[i]=dp1[j]+1;
+                }
+            }
+        }
+        
+        vector<int> dp2(n,1);
+        for(int i=n-1;i>=0;i--){
+            for(int j=n-1;j>i;j--){
+                if(nums[i]>nums[j] && dp2[i]<dp2[j]+1){
+                    dp2[i]=dp2[j]+1;
+                }
+            }
+        }
+        
+        int maxi=0;
+        for(int i=0;i<n;i++){
+            maxi=max(maxi,dp1[i]+dp2[i]-1);
+        }
+        return maxi;
+    }
+
+
+
+
+bool checkPossible(string &s1,string &s2){
+        if(s1.size()!=s2.size()+1) return false;
+        int i=0;
+        int j=0;
+        while(i<s1.size()){
+            if(s1[i]==s2[j]){
+                i++;
+                j++;
+            }
+            else i++;
+        }
+        if(i==s1.size() && j==s2.size()) return true;
+        return false;
+    }
+    static bool cmp(string &s1,string &s2){
+        return s1.size()<s2.size();
+    }
+    int longestStrChain(vector<string>& words) {
+        int n=words.size();
+        vector<int> dp(n,1);
+        int maxi=1;
+        sort(words.begin(),words.end(),cmp);// sorting it acc to lenght , we want a sequence not a subsequence
+        for(int i=0;i<n;i++){
+            for(int j=0;j<i;j++){
+                if(checkPossible(words[i],words[j]) && dp[i]<dp[j]+1){
+                    dp[i]=dp[j]+1;
+                }
+            }
+            maxi=max(maxi,dp[i]);
+        }
+        return maxi;
+    }
+
+
+
+
+// tc=> n*n*n
+    // sc=> n*n 
+    int solve(int i,int j,int arr[],vector<vector<int>> &dp){
+        if(i==j) return 0;
+        int mini=INT_MAX;
+        if(dp[i][j]!=-1) return dp[i][j];
+        for(int k=i;k<j;k++){
+            int steps=arr[i-1]*arr[k]*arr[j]+solve(i,k,arr,dp)+solve(k+1,j,arr,dp);
+            mini=min(mini,steps);
+        }
+        return dp[i][j]=mini;
+    }
+    int matrixMultiplication(int N, int arr[])
+    {
+        vector<vector<int>> dp(N,vector<int>(N,-1));
+        // return solve(1,N-1,arr,dp);
+        for(int i=0;i<N;i++) dp[i][i]=0;
+        for(int i=N-1;i>=1;i--){
+            for(int j=i+1;j<N;j++){
+                int mini=INT_MAX;
+                for(int k=i;k<j;k++){
+                    int steps=arr[i-1]*arr[k]*arr[j]+dp[i][k]+dp[k+1][j];
+                    mini=min(mini,steps);
+                }
+                dp[i][j]=mini;
+            }
+        }
+        return dp[1][N-1];
+    }
+
+
+
+
+int solve(int i,int j,vector<int> &cuts,vector<vector<int>> &dp){
+        if(i>j) return 0;
+        if(dp[i][j]!=-1) return dp[i][j];
+        int mini=INT_MAX;
+        for(int k=i;k<=j;k++){
+            int cost=cuts[j+1]-cuts[i-1]+solve(i,k-1,cuts,dp)+solve(k+1,j,cuts,dp);
+            mini=min(cost,mini);
+        }
+        return dp[i][j]=mini;
+    }
+    int minCost(int n, vector<int>& cuts) {
+        int c=cuts.size();
+        cuts.insert(cuts.begin(),0);
+        cuts.push_back(n);
+        sort(cuts.begin(),cuts.end());
+        // vector<vector<int>> dp(c+1,vector<int> (c+1,-1));
+        // return solve(1,c,cuts,dp);
+        vector<vector<int>> dp(c+2,vector<int> (c+2,0));
+        for(int i=c;i>=1;i--){
+            for(int j=1;j<=c;j++){
+                if(i>j) continue;
+                int mini=INT_MAX;
+                for(int k=i;k<=j;k++){
+                    int cost=cuts[j+1]-cuts[i-1]+dp[i][k-1]+dp[k+1][j];
+                    mini=min(mini,cost);
+                }
+                dp[i][j]=mini;
+            }
+        }
+        return dp[1][c];
+    }
+
+
+
+
+
+int findNumberOfLIS(vector<int>& nums) {
+        int n=nums.size();
+        vector<int> dp(n,1),count(n,1);
+        int maxi=1;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<i;j++){
+                if(nums[i]>nums[j] && dp[i]<dp[j]+1){
+                    dp[i]=dp[j]+1;
+                    count[i]=count[j];
+                }
+                else if(nums[i]>nums[j] && dp[i]==dp[j]+1){
+                    count[i]+=count[j];
+                }
+            }
+            maxi=max(maxi,dp[i]);
+        }
+        int ans=0;
+        for(int i=0;i<n;i++){
+            if(maxi==dp[i]) ans+=count[i];
+        }
+        return ans;
+    }
+
+
+
+
+bool isPalindrome(int i,int j,string &s){
+        while(i<j){
+            if(s[i]!=s[j]) return false;
+            i++;
+            j--;
+        }
+        return true;
+    }
+    int solve(int i,int n,string &s,vector<int> &dp){
+        if(i==n) return 0;
+        if(dp[i]!=-1) return dp[i];
+        int mini=INT_MAX;
+        for(int j=i;j<n;j++){
+            if(isPalindrome(i,j,s)){
+                int cost=1+solve(j+1,n,s,dp);
+                mini=min(mini,cost);
+            } 
+        }
+        return dp[i]=mini;
+    }
+    int minCut(string s) {
+        int n=s.size();
+        // vector<int> dp(n,-1);
+        // return solve(0,n,s,dp)-1; // -1 as it is doing partion at the end also
+        vector<int> dp(n+1,0);
+        dp[n]=0;
+        for(int i=n-1;i>=0;i--){
+            int mini=INT_MAX;
+            for(int j=i;j<n;j++){
+                if(isPalindrome(i,j,s)){
+                    int cost=1+dp[j+1];
+                    mini=min(mini,cost);
+                } 
+            }
+            dp[i]=mini;
+        }
+        return dp[0]-1;
+    }
+
+
+
+
+int solve(int i,vector<int> &arr,int k,int n,vector<int> &dp){
+        if(i==n) return 0;
+        if(dp[i]!=-1) return dp[i];
+        int len=0;
+        int maxi=INT_MIN;
+        int maxAns=INT_MIN;
+        for(int j=i;j<min(n,i+k);j++){
+            len++;
+            maxi=max(maxi,arr[j]);
+            int sum=len*maxi+solve(j+1,arr,k,n,dp);
+            maxAns=max(maxAns,sum);
+        }
+        return dp[i]=maxAns;
+    }
+    int maxSumAfterPartitioning(vector<int>& arr, int k) {
+        int n=arr.size();
+        vector<int> dp(n,-1);
+        return solve(0,arr,k,n,dp);
+    }
+
+
+
+
