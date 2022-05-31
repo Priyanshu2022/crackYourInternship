@@ -7032,3 +7032,136 @@ int solve(int i,vector<int> &arr,int k,int n,vector<int> &dp){
 
 
 
+
+// we will store in temp , the score we will get after deleting that element
+    int deleteAndEarn(vector<int>& nums) {
+        vector<int> temp(1e4+1,0);
+        for(int i=0;i<nums.size();i++){
+            temp[nums[i]]+=nums[i];
+        }
+        int prev=temp[0];
+        int prev2=0;
+        for(int i=1;i<temp.size();i++){
+            int cur=max(prev,prev2+temp[i]);
+            prev2=prev;
+            prev=cur;
+        }
+        return prev;
+    }
+
+
+
+int maxProduct(vector<int>& nums) {
+        int ans=nums[0];
+        int maxi=nums[0];
+        int mini=nums[0];
+        for(int i=1;i<nums.size();i++){
+            if(nums[i]<0) swap(maxi,mini);
+            maxi=max(nums[i],maxi*nums[i]);
+            mini=min(nums[i],mini*nums[i]);
+            ans=max(ans,maxi);
+        }
+        return ans;
+    }
+
+
+
+
+int findPar(int u,vector<int> &parent){
+        if(u==parent[u]) return u;
+        return parent[u]=findPar(parent[u],parent);
+    }
+    void Union(int u,int v,vector<int> &parent,vector<int> &rank){
+        u=findPar(u,parent);
+        v=findPar(v,parent);
+        if(rank[u]>rank[v]){
+            parent[v]=u;
+        }
+        else if(rank[v]>rank[u]){
+            parent[u]=v;
+        }
+        else{
+            parent[v]=u;
+            rank[u]++;
+        }
+    }
+    vector<int> findRedundantConnection(vector<vector<int>>& edges) {
+        int n=edges.size();
+        vector<int> parent(n+1);
+        for(int i=1;i<=n;i++) parent[i]=i;
+        vector<int> rank(n+1,0);
+        for(auto it:edges){
+            if(findPar(it[0],parent)!=findPar(it[1],parent)){
+                Union(it[0],it[1],parent,rank);
+            }
+            else return it;
+        }
+        vector<int> ans;
+        return ans;
+    }
+
+
+
+
+// giving tle
+// at every floor there are two possibilities that the egg can break or not
+    int solve(int f,int e,vector<vector<int>> &dp){
+        if(f==1 || f==0) return f;
+        if(e==1) return f;
+        if(dp[f][e]!=-1) return dp[f][e];
+        int ans=INT_MAX;
+        for(int i=1;i<=f;i++){
+            int moves=1+max(solve(i-1,e-1,dp),solve(f-i,e,dp));
+            ans=min(ans,moves);
+        }
+        return dp[f][e]=ans;
+    }
+    int superEggDrop(int k, int n) {
+        vector<vector<int>> dp(n+1,vector<int>(k+1,-1));
+        return solve(n,k,dp);
+    }
+
+
+
+
+int trap(vector<int>& a) {
+        int l=0;
+        int r=a.size()-1;
+        int ans=0;
+        int leftMax=0;
+        int rightMax=0;
+        while(l<=r){
+            if(a[l]<=a[r]){
+                if(a[l]<=leftMax) ans+=leftMax-a[l];
+                else leftMax=a[l];
+                l++;
+            }
+            else{
+                if(a[r]<=rightMax) ans+=rightMax-a[r];
+                else rightMax=a[r];
+                r--;
+            }
+        }
+        return ans;
+    }
+
+
+
+
+
+int solve(int n,vector<int> &dp){
+        if(n==0) return 1;
+        if(dp[n]!=-1) return dp[n];
+        int ans=0;
+        for(int i=0;i<n;i++){
+            ans+=solve(i,dp)*solve(n-i-1,dp);
+        }
+        return dp[n]=ans;
+    }
+    int numTrees(int n) {
+        vector<int> dp(n+1,-1);
+        return solve(n,dp);
+    }
+
+
+
