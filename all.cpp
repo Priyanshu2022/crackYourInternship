@@ -7165,3 +7165,102 @@ int solve(int n,vector<int> &dp){
 
 
 
+
+
+
+int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+        int balance=0;
+        int start=0;
+        int deficit=0;
+        for(int i=0;i<gas.size();i++){
+            balance+=gas[i]-cost[i];
+            if(balance<0){
+                deficit+=balance;
+                balance=0;
+                start=i+1;
+            }
+        }
+        return balance+deficit>=0?start:-1;
+    }
+
+
+
+// left and right will be at zero, if valid move right , if not move left till it is valid
+    // valid means we can make the substring equal
+    int characterReplacement(string s, int k) {
+        int i=0;
+        int j=0;
+        int maxCount=0;
+        int ans=0;
+        unordered_map<char,int> mp;
+        while(j<s.length()){
+            mp[s[j]]++;
+            maxCount=max(maxCount,mp[s[j]]);
+            while(((j-i+1)-maxCount)>k){
+                mp[s[i]]--;
+                i++;
+            }
+            ans=max(ans,j-i+1);
+            j++;
+        }
+        return ans;
+    }
+
+
+
+
+
+// run dfs
+void dfs(int node,unordered_map<int,vector<int>> &mp,set<int> &vis,vector<int> &ans){
+        if(vis.find(node)!=vis.end()) return ;
+        ans.push_back(node);
+        vis.insert(node);
+        for(auto it:mp[node]){
+            dfs(it,mp,vis,ans);
+        }
+    }
+    vector<int> restoreArray(vector<vector<int>>& adjacentPairs) {
+        unordered_map<int,vector<int>> mp;
+        for(auto it:adjacentPairs){
+            mp[it[0]].push_back(it[1]);
+            mp[it[1]].push_back(it[0]);
+        }
+        int start;
+        for(auto it:mp){
+            if(it.second.size()==1){
+                start=it.first;
+                break;
+            }
+        }
+        set<int> vis;
+        vector<int> ans;
+        dfs(start,mp,vis,ans);
+        
+        return ans;
+    }
+
+
+
+
+void sortColors(vector<int>& nums) {
+        int low=0;
+        int mid=0;
+        int high=nums.size()-1;
+        while(mid<=high){
+            if(nums[mid]==0){
+                swap(nums[mid],nums[low]);
+                low++;
+                mid++;
+            }
+            else if(nums[mid]==1){
+                mid++;
+            }
+            else{
+                swap(nums[mid],nums[high]);
+                high--;
+            }
+        }
+    }
+
+
+
