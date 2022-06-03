@@ -7264,3 +7264,432 @@ void sortColors(vector<int>& nums) {
 
 
 
+
+
+// number of beutiful arrangements (perm[i] is divisible by i or i is divisible by perm[i])
+int solve(int index,vector<int> &v){
+        if(index==v.size()) return 1;
+        int ans=0;
+        for(int i=index;i<v.size();i++){
+            if(v[i]%(index+1)==0 || (index+1)%v[i]==0){
+                swap(v[index],v[i]);
+                ans+=solve(index+1,v);
+                swap(v[index],v[i]);
+            }
+        }
+        return ans;
+    }
+    int countArrangement(int n) {
+        vector<int> v(n);
+        for(int i=0;i<n;i++) v[i]=i+1;
+        return solve(0,v);
+    }
+
+
+
+
+// generate all possible combinations of k numbers
+void solve(int n,int k,vector<vector<int>> &ans,vector<int> &ds){
+        if(k==0){
+            ans.push_back(ds);
+            return ;
+        }
+        if(n==0) return ;
+        
+        ds.push_back(n);
+        solve(n-1,k-1,ans,ds);
+        ds.pop_back();
+        
+        solve(n-1,k,ans,ds);
+    }
+    vector<vector<int>> combine(int n, int k) {
+        vector<vector<int>> ans;
+        vector<int> ds;
+        solve(n,k,ans,ds);
+        return ans;
+    }
+
+
+
+// cannot pick a element more than once for the same position
+    void combinationSum(int ind,int target,vector<int>& candidates,vector<vector<int>> &ans,vector<int> &ds){
+
+        if(target==0){
+            ans.push_back(ds);
+            return;
+        }
+        
+        // for the same index we will not element of same value
+        // we are one by one pickinig our first element 
+        // then second element
+        for(int i=ind;i<candidates.size();i++){
+            if(i>ind && candidates[i]==candidates[i-1]) continue;
+            if(candidates[i]>target) break; // if not able to pick this , can't pick ahead (as sorted)
+            ds.push_back(candidates[i]);
+            combinationSum(i+1,target-candidates[i],candidates,ans,ds);
+            ds.pop_back();
+        }
+    }
+    vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {
+        // in combination sum 2, combinations should not repeat
+        vector<vector<int>> ans;
+        vector<int> ds;
+        sort(candidates.begin(),candidates.end());
+        // we will put subsequences
+        combinationSum(0,target,candidates,ans,ds);
+        return ans;
+    }
+
+
+
+
+bool issafe(int node,int color[],bool graph[101][101],int n,int i){
+    for(int k=0;k<n;k++){
+        if(k!=node && graph[k][node]==1 && color[k]==i) return false;
+    }
+    return true;
+}
+bool solve(int node,bool graph[101][101],int m,int n,int color[]){
+    if(node==n) return true;
+    for(int i=1;i<=m;i++){
+        if(issafe(node,color,graph,n,i)){
+            color[node]=i;
+            if(solve(node+1,graph,m,n,color)) return true;
+            color[node]=0;
+        }
+    }
+    return false;
+}
+bool graphColoring(bool graph[101][101], int m, int V)
+{
+    int color[V]={0};
+    return solve(0,graph,m,V,color);
+}
+
+
+
+
+// if only one of the child is null then , that node is not leaf
+    int minDepth(TreeNode* root) {
+        if(root==NULL) return 0;
+        int left=minDepth(root->left);
+        int right=minDepth(root->right);
+        return (left==0||right==0)?left+right+1:min(left,right)+1;
+    }
+
+
+
+// stack will store char and needed time
+int minCost(string colors, vector<int>& neededTime) {
+        stack<pair<char,int>> st;
+        int ans=0;
+        st.push({colors[0],neededTime[0]});
+        for(int i=1;i<colors.size();i++){
+            if(colors[i]==st.top().first){
+                int prev=st.top().second;
+                st.pop();
+                int cur=neededTime[i];
+                ans+=min(cur,prev);
+                if(prev<cur){
+                    st.push({colors[i],cur});
+                }
+                else st.push({colors[i],prev});
+            }
+            else st.push({colors[i],neededTime[i]});
+        }
+        return ans;
+    }
+
+
+
+bool isValid(int row,int col,vector<string> &board,int n){
+        int i=row;
+        while(i>=0){
+            if(board[i][col]=='Q') return false;
+            i--;
+        }
+        i=row;
+        int j=col;
+        while(i>=0 && j>=0){
+            if(board[i][j]=='Q') return false;
+            i--;
+            j--;
+        }
+        i=row;
+        j=col;
+        while(i>=0 && j<n){
+            if(board[i][j]=='Q') return false;
+            i--;
+            j++;
+        }
+        return true;
+    }
+    void solve(vector<vector<string>> &ans,vector<string> &board,int n,int row){
+        if(row==n){
+            ans.push_back(board);
+            return;
+        }
+        for(int i=0;i<n;i++){
+            if(isValid(row,i,board,n)){
+                board[row][i]='Q';
+                solve(ans,board,n,row+1);
+                board[row][i]='.';
+            }
+        }
+    }
+public:
+    vector<vector<string>> solveNQueens(int n) {
+        vector<vector<string>> ans;
+        vector<string> board(n);
+        string s(n,'.');
+        for(int i=0;i<n;i++){
+            board[i]=s;
+        }
+        solve(ans,board,n,0);
+        return ans;
+    }
+
+
+
+
+
+bool isPalindrome(int start,int end,string &s){
+        while(start<=end){
+            if(s[start++]!=s[end--]) return false;
+        }
+        return true;
+    }
+    void solve(int index,string &s,vector<vector<string>> &ans,vector<string> &path){
+        if(index==s.length()){
+            ans.push_back(path);
+            return ;
+        }
+        for(int i=index;i<s.length();i++){
+            if(isPalindrome(index,i,s)){
+                path.push_back(s.substr(index,i-index+1));
+                solve(i+1,s,ans,path);
+                path.pop_back();
+            }
+        }
+    }
+    vector<vector<string>> partition(string s) {
+        vector<vector<string>> ans;
+        vector<string> path;
+        solve(0,s,ans,path);
+        return ans;
+    }
+
+
+
+
+// permuations have duplicates
+// generate all possible unique permutaion 
+void solve(int index,vector<int> &nums,vector<vector<int>> &ans){
+        if(index==nums.size()){
+            ans.push_back(nums);
+            return ;
+        }
+        set<int> st;
+        for(int i=index;i<nums.size();i++){
+            if(st.find(nums[i])!=st.end()) continue;
+            st.insert(nums[i]);
+            swap(nums[i],nums[index]);
+            solve(index+1,nums,ans);
+            swap(nums[i],nums[index]);
+        }
+    }
+    vector<vector<int>> permuteUnique(vector<int>& nums) {
+        vector<vector<int>> ans;
+        solve(0,nums,ans);
+        return ans;
+    }
+
+
+
+
+// ***********************
+vector<vector<int>> dp;
+    NumMatrix(vector<vector<int>>& matrix) {
+        int n=matrix.size();
+        int m=matrix[0].size();
+        dp.resize(n+1,vector<int> (m+1,0));
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                dp[i+1][j+1]=dp[i+1][j]+dp[i][j+1]+matrix[i][j]-dp[i][j];
+            }
+        }
+    }
+    
+    int sumRegion(int row1, int col1, int row2, int col2) {
+        return dp[row2+1][col2+1]-dp[row1][col2+1]-dp[row2+1][col1]+dp[row1][col1];
+    }
+
+
+
+void func(int index,vector<vector<int>> &ans,vector<int> &ds,vector<int>& nums){
+        ans.push_back(ds);
+        for(int i=index;i<nums.size();i++){
+            if(i>index && nums[i]==nums[i-1]) continue;
+            ds.push_back(nums[i]);
+            func(i+1,ans,ds,nums);
+            ds.pop_back();
+        }
+    }
+    vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+        vector<vector<int>> ans;
+        vector<int> ds;
+        sort(nums.begin(),nums.end());
+        func(0,ans,ds,nums);
+        return ans;
+    }
+
+
+
+
+
+bool isValid(int row,int col,char check,vector<vector<char>> &boards){
+        for(int i=0;i<9;i++){
+            if(boards[row][i]==check) return false;
+            if(boards[i][col]==check) return false;
+            if(boards[3*(row/3)+i/3][3*(col/3)+i%3]==check) return false;
+        }
+        return true;
+    }
+    bool solve(vector<vector<char>>&boards){
+        for(int i=0;i<boards.size();i++){
+            for(int j=0;j<boards[0].size();j++){
+                if(boards[i][j]=='.'){
+                    for(char c='1';c<='9';c++){
+                        if(isValid(i,j,c,boards)){
+                            boards[i][j]=c;
+                            if(solve(boards)==true){
+                                return true;
+                            }
+                            else{
+                                boards[i][j]='.';
+                            }
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    void solveSudoku(vector<vector<char>>& boards) {
+        bool temp=solve(boards);
+    }
+
+
+
+
+
+
+// start and end
+// break at every point
+// and calculate left nodes and right nodes , attach
+vector<TreeNode*> solve(int start,int end){
+        vector<TreeNode*> ans;
+        if(start==end){
+            ans.push_back(new TreeNode(start));
+            return ans;
+        }
+        else if(start>end){
+            ans.push_back(NULL);
+            return ans;
+        }
+        else if(start<end){
+            for(int k=start;k<=end;k++){
+                vector<TreeNode*> left=solve(start,k-1); // will generate all left trees
+                vector<TreeNode*> right=solve(k+1,end);  //                   right
+                for(int i=0;i<left.size();i++){
+                    for(int j=0;j<right.size();j++){
+                        TreeNode* root=new TreeNode(k);
+                        root->left=left[i];
+                        root->right=right[j];
+                        ans.push_back(root);
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+    vector<TreeNode*> generateTrees(int n) {
+        return solve(1,n);
+    }
+
+
+
+
+int dfs(int i,int j,int zero,vector<vector<int>> &grid){
+        if(i<0 || j<0 || i>=grid.size() || j>=grid[0].size() || grid[i][j]==-1) return 0;
+        if(grid[i][j]==2) return zero==-1?1:0;
+        int totalPath=0;
+        grid[i][j]=-1;
+        zero--;
+        int dx[]={1,-1,0,0};
+        int dy[]={0,0,1,-1};
+        for(int k=0;k<4;k++){
+            totalPath+=dfs(i+dx[k],j+dy[k],zero,grid);
+        }
+        grid[i][j]=0;
+        zero++;
+        return totalPath;
+    }
+    int uniquePathsIII(vector<vector<int>>& grid) {
+        int n=grid.size();
+        int m=grid[0].size();
+        int x,y;
+        int zero=0;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(grid[i][j]==0) zero++;
+                else if(grid[i][j]==1) x=i,y=j;
+            }
+        }
+        return dfs(x,y,zero,grid);
+    }
+
+
+
+
+
+void solve(int index,string &s,unordered_map<string,int> mp,vector<vector<string>> &ans,vector<string> &ds){
+        if(index==s.length()) {
+            ans.push_back(ds);
+            return ;
+        }
+        string temp;
+        for(int i=index;i<s.length();i++){
+            temp+=s[i];
+            if(mp.find(temp)!=mp.end()){
+                ds.push_back(temp);
+                solve(i+1,s,mp,ans,ds);
+                ds.pop_back();
+            }
+        }
+    }
+    vector<string> wordBreak(string s, vector<string>& wordDict) {
+        vector<vector<string>> ans;
+        vector<string> ds;
+        unordered_map<string,int> mp;
+        for(auto it:wordDict) mp[it]++;
+        solve(0,s,mp,ans,ds);
+        vector<string> finalAns;
+        for(auto it:ans){
+            string temp="";
+            for(auto cur:it){
+                if(temp.length()==0) temp+=cur;
+                else{
+                    temp+=" ";
+                    temp+=cur;
+                }
+            }
+            finalAns.push_back(temp);
+        }
+        return finalAns;
+    }
+
+
+
+
