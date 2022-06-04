@@ -7693,3 +7693,167 @@ void solve(int index,string &s,unordered_map<string,int> mp,vector<vector<string
 
 
 
+
+vector<int> diffWaysToCompute(string s) {
+        vector<int> ans;
+        for(int i=0;i<s.length();i++){
+            if(s[i]=='*' || s[i]=='+' || s[i]=='-'){
+                vector<int> left=diffWaysToCompute(s.substr(0,i));
+                vector<int> right=diffWaysToCompute(s.substr(i+1));
+                for(int j=0;j<left.size();j++){
+                    for(int k=0;k<right.size();k++){
+                        if(s[i]=='+') ans.push_back(left[j]+right[k]);
+                        else if(s[i]=='*') ans.push_back(left[j]*right[k]);
+                        else ans.push_back(left[j]-right[k]);
+                    }
+                }
+            }
+        }
+        if(ans.size()==0) ans.push_back(stoi(s));
+        return ans;
+    }
+
+
+
+
+
+int calculateMinimumHP(vector<vector<int>>& dungeon) {
+        int n=dungeon.size();
+        int m=dungeon[0].size();
+        vector<vector<int>> dp(n+1,vector<int>(m+1,INT_MAX));
+        dp[n][m]=1;
+        dp[n-1][m]=1;
+        dp[n][m-1]=1;
+        for(int i=n-1;i>=0;i--){
+            for(int j=m-1;j>=0;j--){
+                int minHealth=min(dp[i+1][j],dp[i][j+1])-dungeon[i][j];
+                dp[i][j]=(minHealth<=0)?1:minHealth;
+            }
+        }
+        return dp[0][0];
+    }
+
+
+
+
+string solve(TreeNode* root,unordered_map<string,vector<TreeNode*>> &mp){
+        if(root==NULL) return "";
+        string s="";
+        s+='(';
+        s+=solve(root->left,mp);
+        s+=to_string(root->val);
+        s+=solve(root->right,mp);
+        s+=')';
+        mp[s].push_back(root);
+        return s;
+    }
+    vector<TreeNode*> findDuplicateSubtrees(TreeNode* root) {
+        unordered_map<string,vector<TreeNode*>> mp;
+        solve(root,mp);
+        vector<TreeNode*> ans;
+        for(auto it:mp){
+            if(it.second.size()>=2){
+                ans.push_back(it.second[0]);
+            }
+        }
+        return ans;
+    }
+
+
+
+
+int eraseOverlapIntervals(vector<vector<int>>& intervals) {
+        sort(intervals.begin(),intervals.end());
+        int endTime=intervals[0][1];
+        int ans=0;
+        for(int i=1;i<intervals.size();i++){
+            if(intervals[i][0]<endTime){
+                ans++;
+                endTime=min(endTime,intervals[i][1]);
+            }
+            else{
+                endTime=intervals[i][1];
+            }
+        }
+        return ans;
+    }
+
+
+
+
+
+// for all divisors
+bool repeatedSubstringPattern(string s) {
+        int n=s.length();
+        for(int i=1;i<=n/2;i++){
+            if(n%i==0){
+                string temp=s.substr(0,i);
+                string tempString="";
+                for(int j=0;j<(n/i);j++){
+                    tempString+=temp;
+                }
+                if(tempString==s) return true;
+            }
+        }
+        return false;
+    }
+
+
+
+
+// Encodes a tree to a single string.
+    string serialize(TreeNode* root) {
+        if(root==NULL) return "";
+        queue<TreeNode*> q;
+        q.push(root);
+        string ans="";
+        while(!q.empty()){
+            TreeNode* cur=q.front();
+            q.pop();
+            if(cur==NULL) ans+="#,";
+            else ans+=(to_string(cur->val)+',');
+            if(cur!=NULL){
+                q.push(cur->left);
+                q.push(cur->right);
+            }
+        }
+        return ans;
+    }
+
+    // Decodes your encoded data to tree.
+    TreeNode* deserialize(string data) {
+        if(data.size()==0) return NULL;
+        stringstream s(data);
+        string str;
+        getline(s,str,',');
+        TreeNode* root=new TreeNode(stoi(str));
+        queue<TreeNode*> q;
+        q.push(root);
+        while(!q.empty()){
+            TreeNode* cur=q.front();
+            q.pop();
+            getline(s,str,',');
+            if(str=="#"){
+                cur->left=NULL;
+            }
+            else{
+                TreeNode* l=new TreeNode(stoi(str));
+                cur->left=l;
+                q.push(l);
+            }
+            getline(s,str,',');
+            if(str=="#"){
+                cur->right=NULL;
+            }
+            else{
+                TreeNode* r=new TreeNode(stoi(str));
+                cur->right=r;
+                q.push(r);
+            }
+        }
+        return root;
+    }
+
+
+
+
