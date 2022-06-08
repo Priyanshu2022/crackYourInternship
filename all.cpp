@@ -7857,3 +7857,638 @@ bool repeatedSubstringPattern(string s) {
 
 
 
+
+// tc-> (logn)^2
+// for complete tree , no of node => 2^n -1
+    int leftHeight(TreeNode* root){
+        int height=0;
+        while(root){
+            height++;
+            root=root->left;
+        }
+        return height;
+    }
+    int rightHeight(TreeNode* root){
+        int height=0;
+        while(root){
+            height++;
+            root=root->right;
+        }
+        return height;
+    }
+    int countNodes(TreeNode* root) {
+        if(root==0) return 0;
+        int lh=leftHeight(root);
+        int rh=rightHeight(root);
+        if(lh==rh) return (1<<lh)-1;
+        return 1+countNodes(root->left)+countNodes(root->right);
+    }
+
+
+
+// tarjan's algo
+// time of insertion (tin), lowest time(low)
+void dfs(int node,int parent,vector<int> &vis,vector<int> &tin,vector<int> &low,int &timer,vector<vector<int>> &adj,vector<vector<int>> &ans){
+        vis[node]=1;
+        tin[node]=low[node]=timer++;
+        for(auto it:adj[node]){
+            if(parent==it) continue;
+            if(!vis[it]){
+                dfs(it,node,vis,tin,low,timer,adj,ans);
+                low[node]=min(low[node],low[it]);
+                if(low[it]>tin[node]){
+                    ans.push_back({node,it});
+                }
+            }else{
+                low[node]=min(low[node],tin[it]);
+            }
+        }
+    }
+    vector<vector<int>> criticalConnections(int n, vector<vector<int>>& connections) {
+        vector<vector<int>> adj(n);
+        for(auto it:connections){
+            adj[it[0]].push_back(it[1]);
+            adj[it[1]].push_back(it[0]);
+        }
+        vector<vector<int>> ans;
+        vector<int> vis(n,0);
+        vector<int> tin(n,-1);
+        vector<int> low(n,-1);
+        int timer=0;
+        for(int i=0;i<n;i++){
+            if(!vis[i]){
+                dfs(i,-1,vis,tin,low,timer,adj,ans);
+            }
+        }
+        return ans;
+    }
+
+
+
+
+
+// design a text editor
+string left="";
+    string right="";
+    TextEditor() {
+        
+    }
+    
+    void addText(string text) {
+        left+=text;
+    }
+    
+    int deleteText(int k) {
+        int deleted=0;
+        while(k>0 && left.size()!=0){
+            left.pop_back();
+            k--;
+            deleted++;
+        }
+        return deleted;
+    }
+    
+    string cursorLeft(int k) {
+        while(k>0 && left.size()!=0){
+            right.push_back(left.back());
+            left.pop_back();
+            k--;
+        }
+        if(left.length()<10) return left;
+        else return left.substr(left.size()-10);
+    }
+    
+    string cursorRight(int k) {
+        while(k>0 && right.size()!=0){
+            left.push_back(right.back());
+            right.pop_back();
+            k--;
+        }
+        if(left.length()<10) return left;
+        else return left.substr(left.size()-10);
+    }
+
+
+
+
+string largestTimeFromDigits(vector<int>& a) {
+        sort(a.begin(),a.end(),greater<int>());
+        do{
+            if((a[0]==2 && a[1]<=3 && a[2]<=5 && a[3]<=9) || (a[0]<=1 && a[1]<=9 && a[2]<=5 && a[3]<=9)){
+                string ans="";
+                ans+=to_string(a[0])+to_string(a[1])+":"+to_string(a[2])+to_string(a[3]);
+                return ans;
+                break;
+            }
+        }while(prev_permutation(a.begin(),a.end()));
+        return "";
+    }
+
+
+
+
+// from a given position check , what is the minimum that we can go from here
+// minimum number of squares to make n
+    int numSquares(int n) {
+        vector<int> dp(n+1);
+        dp[0]=0;
+        for(int i=1;i<=n;i++){
+            int mini=INT_MAX;
+            for(int j=1;j*j<=i;j++){
+                mini=min(mini,dp[i-j*j]);
+            }
+            dp[i]=mini+1;
+        }
+        return dp[n];
+    }
+
+
+
+
+// Sieve
+// tc -> n(log(logn))
+vector<bool> isPrime(n,1);
+isPrime[0]=isPrime[1]=false;
+for(int i=2;i<n;i++){
+    if(isPrime[i]==true){
+        for(int j=2*i;j<n;j+=i){
+            isPrime[j]=false;
+        }
+    }
+}
+
+
+
+
+long long int solve(int i,int j,string &s,vector<vector<long long int>> &dp){
+        if(i>j) return 0;
+        if(dp[i][j]!=-1) return dp[i][j];
+        if(s[i]==s[j]){
+            return dp[i][j]= (1+solve(i+1,j,s,dp)+solve(i,j-1,s,dp)+1000000007)%(1000000007);
+        }
+        else{
+            return dp[i][j]= (solve(i+1,j,s,dp)+solve(i,j-1,s,dp)-solve(i+1,j-1,s,dp)+1000000007)%(1000000007);
+        }
+    }
+    long long int  countPS(string str)
+    {
+       int i=0;
+       int j=str.length()-1;
+       vector<vector<long long int >> dp(str.length(),vector<long long int>(str.length(),-1));
+       return solve(0,j,str,dp);
+    }
+
+
+
+
+
+int furthestBuilding(vector<int>& heights, int bricks, int ladders) {
+        priority_queue<int> pq;
+        int i ;
+        for( i=0;i<heights.size()-1;i++){
+            if(heights[i+1]<=heights[i]) continue;
+            int dif=heights[i+1]-heights[i];
+            if(bricks>=dif){
+                pq.push(dif);
+                bricks-=dif;
+            }
+            else if(ladders>0){
+                if(!pq.empty()){
+                    if(pq.top()>dif){
+                        int maxBricksUsed=pq.top();
+                        pq.pop();
+                        bricks+=maxBricksUsed-dif;
+                        pq.push(dif);
+                    }
+                }
+                ladders--;
+            }
+            else break;
+        }
+        return i;
+    }
+
+
+
+
+
+// if cell becoming dead replace with -1
+    // if cell becoming live replace with 2
+    void gameOfLife(vector<vector<int>>& board) {
+        int n=board.size();
+        int m=board[0].size();
+        int dx[]={0,0,1,1,1,-1,-1,-1};
+        int dy[]={1,-1,1,-1,0,0,1,-1};
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                int countOne=0;
+                for(int k=0;k<8;k++){
+                    int cx=i+dx[k];
+                    int cy=j+dy[k];
+                    if(cx<0 || cy<0 || cx>=n || cy>=m) continue;
+                    if(abs(board[cx][cy])==1) countOne++;
+                }
+                if(board[i][j]==0){
+                    if(countOne==3){
+                        board[i][j]=2;
+                    }
+                }
+                else if(board[i][j]==1){
+                    if(countOne<2 || countOne>3){
+                        board[i][j]=-1;
+                    }
+                }
+            }
+        }
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(board[i][j]==-1) board[i][j]=0;
+                else if(board[i][j]==2) board[i][j]=1;
+            }
+        }
+    }
+
+
+
+
+ // min heap -> nlogk
+    int findKthLargest(vector<int>& nums, int k) {
+        priority_queue<int,vector<int>,greater<int>> pq;
+        for(int i=0;i<nums.size();i++){
+            pq.push(nums[i]);
+            if(pq.size()>k) pq.pop();
+        }
+        return pq.top();
+    }
+
+
+
+// sorting algo
+// selection sort -> place smallest element in correct position
+    // sc=> 1 , tc=> n^2
+    // best case => n^2 , worst case => n^2
+    // usecase => small array size
+    vector<int> sortArray(vector<int>& nums) {
+        int n=nums.size();
+        for(int i=0;i<n;i++){
+            int minIndex=i;
+            for(int j=i+1;j<n;j++){
+                if(nums[j]<nums[minIndex]){
+                    minIndex=j;
+                }
+            }
+            swap(nums[i],nums[minIndex]);
+        }
+        return nums;
+    }
+
+// bubble sort
+// compare adjacents
+    // largest element will be placed
+    // use case
+    // tc=> n^2 , sc=> 1
+    // can be further optimized , if number of swaps is zero than the array is sorted
+    vector<int> sortArray(vector<int>& a) {
+        int n=a.size();
+        bool swapped=false;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n-i-1;j++){
+                if(a[j]>a[j+1]){
+                    swap(a[j],a[j+1]);
+                    swapped=true;
+                }
+            }
+            if(swapped==false) break;
+        }
+        return a;
+    }
+
+// insertion sort
+// adaptible
+    // stable algo
+    // better in partially sorted 
+    // tc=> n^2  , sc=> 1
+    // best cast => n , worst case=> n^2
+    vector<int> sortArray(vector<int>& a) {
+        int n=a.size();
+        for(int i=1;i<n;i++){
+            int temp=a[i];
+            int j=i-1;
+            for(j;j>=0;j--){
+                if(a[j]>temp){
+                    a[j+1]=a[j];
+                }
+                else{
+                    break;
+                }
+            }
+            a[j+1]=temp;
+        }
+        return a;
+    }
+
+
+
+
+
+vector<int> topKFrequent(vector<int>& nums, int k) {
+        unordered_map<int,int> counts;
+        priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>> pq;
+        for(int i=0;i<nums.size();i++){
+            counts[nums[i]]++;
+        }
+        for(auto it:counts){
+            pq.push({it.second,it.first});
+            if(pq.size()>k) pq.pop();
+        }
+        vector<int> ans;
+        while(!pq.empty()){
+            ans.push_back(pq.top().second);
+            pq.pop();
+        }
+        return ans;
+    }
+
+
+
+
+
+vector<vector<int>> kClosest(vector<vector<int>>& points, int k) {
+        priority_queue<pair<int,pair<int,int>>,vector<pair<int,pair<int,int>>>,greater<pair<int,pair<int,int>>>> pq;
+        for(int i=0;i<points.size();i++){
+            pq.push({points[i][0]*points[i][0]+points[i][1]*points[i][1],{points[i][0],points[i][1]}});
+        }
+        vector<vector<int>> ans;
+        while(k>0 && !pq.empty()){
+            int x=pq.top().second.first;
+            int y=pq.top().second.second;
+            pq.pop();
+            ans.push_back({x,y});
+            k--;
+        }
+        return ans;
+    }
+
+
+
+
+
+// push all stations before current , in max heap
+    // take if distance is less than target
+    int minRefuelStops(int target, int startFuel, vector<vector<int>>& stations) {
+        int i=0;
+        int cur=startFuel;
+        int ans=0;
+        priority_queue<int> pq;
+        while(cur<target){
+            while(i<stations.size() && stations[i][0]<=cur) pq.push(stations[i++][1]);
+            if(pq.empty()) return -1;
+            cur+=pq.top();
+            pq.pop();
+            ans++;
+        }
+        return ans;
+    }
+
+
+
+
+
+int solve(int i,int j,string &s,vector<vector<int>> &dp){
+        if(i>j) return 1;
+        if(dp[i][j]!=-1) return dp[i][j]; 
+        return dp[i][j]= s[i]==s[j]?solve(i+1,j-1,s,dp):0;
+    }
+    int countSubstrings(string s) {
+        int ans=0;
+        int n=s.length();
+        // vector<vector<int>> dp(n,(vector<int>(n,-1)));
+        // for(int i=0;i<n;i++){
+        //     for(int j=i;j<n;j++){
+        //         ans+=solve(i,j,s,dp);
+        //     }
+        // }
+        // return ans;
+        vector<vector<bool>> dp(n,vector<bool>(n,false));
+        for(int dif=0;dif<n;dif++){ // length of string -1 i.e. dif between i and j
+            for(int i=0,j=dif;j<n;i++,j++){
+                if(dif==0) dp[i][j]=true;
+                else if(dif==1){
+                    dp[i][j]= (s[i]==s[j]);
+                }
+                else{
+                    if(s[i]==s[j]) dp[i][j]=dp[i+1][j-1];
+                    else dp[i][j]=false;
+                }
+                if(dp[i][j]) ans++;
+            }
+        }
+        return ans;
+    }
+
+
+
+
+
+
+string reorganizeString(string s) {
+        map<int,int> counts;
+        for(auto it:s) counts[it]++;
+        priority_queue<pair<int,int>> pq;
+        for(auto it:counts){
+            pq.push({it.second,it.first});
+        }
+        pair<int,int> top1,top2;
+        string ans="";
+        while(!pq.empty()){
+            top1=pq.top();
+            pq.pop();
+            ans+=(char)top1.second;
+            if(!pq.empty()){
+                top2=pq.top();
+                pq.pop();
+                ans+=(char)top2.second;
+                if(top2.first>1) pq.push({top2.first-1,top2.second});
+            }
+            if(top1.first>1) pq.push({top1.first-1,top1.second});     
+        }
+        for(int i=0;i<ans.length()-1;i++){
+            if(ans[i]==ans[i+1]) return "";
+        }
+        return ans;
+    }
+
+
+
+
+
+// storing in dq in decreasing order
+    // storing index in dq
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        vector<int> ans;
+        deque<int> dq;
+        for(int i=0;i<nums.size();i++){
+            if(!dq.empty() && dq.front()==i-k) dq.pop_front();// remove out of bound element
+            while(!dq.empty() && nums[dq.back()]<=nums[i]) dq.pop_back();// removing all element less than i
+            dq.push_back(i);
+            if(i>=k-1) ans.push_back(nums[dq.front()]);// after we have checked for 1st subarray of size k
+        }
+        return ans;
+    }
+
+
+
+// binary search on time , for each time run dfs
+    bool dfs(int x,int y,int t,vector<vector<int>> &grid,vector<vector<int>> &vis){
+        if(grid[x][y]>t) return false;
+        if(x==grid.size()-1 && y==grid.size()-1) return true;
+        vis[x][y]=1;
+        int dx[]={1,-1,0,0};
+        int dy[]={0,0,1,-1};
+        for(int i=0;i<4;i++){
+            int cx=x+dx[i];
+            int cy=y+dy[i];
+            if(cx<0 || cy<0 || cx>=grid.size() || cy>=grid.size() || vis[cx][cy]) continue;
+            if(dfs(cx,cy,t,grid,vis)) return true;
+        }
+        return false;
+    }
+    int swimInWater(vector<vector<int>>& grid) {
+        int n=grid.size();
+        int low=0;
+        int high=50*50;
+        int ans=-1;
+        while(low<=high){
+            int mid=(low+high)/2;
+            vector<vector<int>> vis(n,vector<int>(n,0));
+            if(dfs(0,0,mid,grid,vis)){
+                ans=mid;
+                high=mid-1;
+            }
+            else low=mid+1;
+        }
+        return ans;
+    }
+
+
+
+
+
+
+vector<vector<int>> threeSum(vector<int>& nums) {
+        sort(nums.begin(),nums.end());
+        vector<vector<int>> ans;
+        int n=nums.size();
+        for(int i=0;i<n-2;i++){
+            if(i==0 || nums[i]!=nums[i-1]){
+                int l=i+1;
+                int h=n-1;
+                int sum=0-nums[i];
+                while(l<h){
+                    if(nums[l]+nums[h]==sum){
+                        vector<int> temp;
+                        temp.push_back(nums[i]);
+                        temp.push_back(nums[l]);
+                        temp.push_back(nums[h]);
+                        ans.push_back(temp);
+                        l++;
+                        h--;
+                        while(l<h && nums[l]==nums[l-1]) l++;
+                        while(l<h && nums[h]==nums[h+1]) h--;
+                    }
+                    else if(nums[l]+nums[h]>sum) h--;
+                    else l++;
+                }
+            }
+        }
+        return ans;
+    }
+
+
+
+
+vector<vector<int>> fourSum(vector<int>& nums, int target) {
+        int n=nums.size();
+        sort(nums.begin(),nums.end());
+        vector<vector<int>> ans;
+        for(int i=0;i<n-3;i++){
+            if(i==0 || nums[i]!=nums[i-1]){
+                for(int j=i+1;j<n-2;j++){
+                    if(j==i+1 || nums[j]!=nums[j-1]){
+                        cout<<j<<endl;
+                        int l=j+1;
+                        int h=n-1;
+                        int sum=target-nums[i]-nums[j];
+                        while(l<h){
+                            if(nums[l]+nums[h]==sum){
+                                ans.push_back({nums[i],nums[j],nums[l],nums[h]});
+                                l++;
+                                h--;
+                                while(l<h && nums[l]==nums[l-1]) l++;
+                                while(l<h && nums[h]==nums[h+1]) h--;
+                            }
+                            else if(nums[l]+nums[h]>sum) h--;
+                            else l++;
+                        }
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+
+
+
+
+// binary tree to bst
+// find inorder , sort it then and traverse in inorder and change the values
+
+
+
+
+void solve(int s,int h,int d,int n,long long &count){
+    if(n==1){
+        cout<<"move disk "<<n<<" from rod "<<s<<" to rod "<<d<<endl;
+        count++;
+        return ;
+    }
+    solve(s,d,h,n-1,count);
+    cout<<"move disk "<<n<<" from rod "<<s<<" to rod "<<d<<endl;
+    count++;
+    solve(h,s,d,n-1,count);
+}
+long long toh(int N, int from, int to, int aux) {
+    long long count=0;
+    solve(from,aux,to,N,count);
+    return count;
+}
+
+
+
+
+// find nth ugly number
+// take three pointers
+int nthUglyNumber(int n) {
+        vector<int> dp(n);
+        dp[0]=1;
+        int p1=0;
+        int p2=0;
+        int p3=0;
+        for(int i=1;i<n;i++){
+            int twomultiple=dp[p1]*2;
+            int threemultiple=dp[p2]*3;
+            int fivemultiple=dp[p3]*5;
+            dp[i]=min(twomultiple,min(threemultiple,fivemultiple));
+            if(dp[i]==twomultiple) p1++;
+            if(dp[i]==threemultiple) p2++;
+            if(dp[i]==fivemultiple) p3++;
+        }
+        return dp[n-1];
+    }
+
+
+
+
+
+
+
