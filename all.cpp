@@ -8491,4 +8491,112 @@ int nthUglyNumber(int n) {
 
 
 
+// (a+b)%m =
+// (a-b)%m =
+// (a*b)%m =
+// (a/b)%m = (a%m)*((b^-1)%m)%m
+// if b is very large
+// eulers=> a^b % m = a^(b%phi(m)) %m
+// etf=phi(n) is number's less tha n which are co prime with n (coprime => gcd => 1), n*prod(1-1/p) => p is all prime factors
+// for prime number eft=n-1
 
+// for prime m
+// a^b %m=a^(b%(m-1)) %m
+
+
+
+
+
+int longestValidParentheses(string s) {
+        stack<int> st;
+        for(int i=0;i<s.size();i++){
+            if(s[i]=='(') st.push(i);
+            else{
+                if(!st.empty() && s[st.top()]=='(') st.pop();
+                else st.push(i);
+            }
+        }
+        int ans=0;
+        int end=s.length();
+        while(!st.empty()){
+            int start=st.top();
+            st.pop();
+            ans=max(ans,end-start-1);
+            end=start;
+        }
+        return max(ans,end);
+    }
+
+
+
+
+
+// only 6 cells are changing => 2^6=64 combinations , means pattern will repeat
+vector<int> prisonAfterNDays(vector<int>& cells, int n) {
+        set<vector<int>> st;
+        int size=0;
+        for(int i=0;i<n;i++){ // this will not run n time , it will break when , we will find the pattern
+            vector<int> temp(8,0);
+            for(int i=1;i<7;i++){
+                temp[i]= (cells[i-1]==cells[i+1]);
+            }
+            if(st.find(temp)!=st.end()) break;
+            cells=temp;
+            st.insert(temp);
+            size++;
+        }
+        for(auto it:cells) cout<<it<<" ";
+        n=n%size;
+        for(int i=0;i<n;i++){
+            vector<int> temp(8,0);
+            for(int j=1;j<7;j++){
+                temp[j]= cells[j-1]==cells[j+1];
+            }
+            cells=temp;
+        }
+        return cells;
+    }
+
+
+
+
+
+bool isRectangleOverlap(vector<int>& rec1, vector<int>& rec2) {
+        return rec2[0]<rec1[2] && rec2[2]>rec1[0] && rec2[1]<rec1[3] && rec2[3]>rec1[1];
+    }
+
+
+
+
+// **********************
+// dfs1 is to mark the count and calculate the answer for root node
+// dfs is to re-root the roots to calculate the anwer for all nodes
+// count is no of nodes in its substree
+void dfs1(int i,int parent,vector<int> &count,vector<int> &res,vector<vector<int>> &v){
+        for(auto it:v[i]){
+            if(it==parent) continue;
+            dfs1(it,i,count,res,v);
+            count[i]+=count[it];
+            res[i]+=res[it]+count[it];
+        }
+        count[i]++;
+    }
+    void dfs(int i,int parent,int n,vector<int> &count,vector<int> &res,vector<vector<int>> &v){
+        for(auto it:v[i]){
+            if(it==parent) continue;
+            res[it]=res[i]-count[it]+n-count[it];
+            dfs(it,i,n,count,res,v);
+        }
+    }
+    vector<int> sumOfDistancesInTree(int n, vector<vector<int>>& edges) {
+        vector<int> count(n,0);
+        vector<int> res(n,0);
+        vector<vector<int>> v(n);
+        for(auto it:edges){
+            v[it[0]].push_back(it[1]);
+            v[it[1]].push_back(it[0]);
+        }
+        dfs1(0,-1,count,res,v);
+        dfs(0,-1,n,count,res,v);
+        return res;
+    }
