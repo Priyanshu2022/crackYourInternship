@@ -8600,3 +8600,213 @@ void dfs1(int i,int parent,vector<int> &count,vector<int> &res,vector<vector<int
         dfs(0,-1,n,count,res,v);
         return res;
     }
+
+
+
+
+void solve(int i,vector<int> &v,vector<int> &cookies,int k,int &ans){
+        if(i==cookies.size()){
+            ans=min(ans,*max_element(v.begin(),v.end()));
+            return ;
+        }
+        for(int j=0;j<k;j++){
+            v[j]+=cookies[i];
+            solve(i+1,v,cookies,k,ans);
+            v[j]-=cookies[i];
+        }
+    }
+    int distributeCookies(vector<int>& cookies, int k) {
+        int ans=INT_MAX;
+        vector<int> v(cookies.size(),0);
+        solve(0,v,cookies,k,ans);
+        return ans;
+    }
+
+
+
+
+
+int maximumUniqueSubarray(vector<int>& nums) {
+        int ans=0;
+        unordered_map<int,int> mp;
+        int sum=0;
+        int left=0;
+        int right=0;
+        while(right<nums.size()){
+            while(mp.find(nums[right])!=mp.end()){
+                mp.erase(nums[left]);
+                sum-=nums[left];
+                left++;
+            }
+            mp[nums[right]]=right;
+            sum+=nums[right];
+            ans=max(ans,sum);
+            right++;
+        }
+        return ans;
+    }
+
+
+
+
+
+// find maximum subarray of sum totalSum-x 
+    int minOperations(vector<int>& nums, int x) {
+        map<int,int> mp;// prefix sum and index
+        mp[0]=-1;
+        int totalSum=accumulate(nums.begin(),nums.end(),0);
+        int target=totalSum-x;
+        int maxLen=-1;
+        int prefix=0;
+        for(int i=0;i<nums.size();i++){
+            prefix+=nums[i];
+            mp[prefix]=i;
+            if(mp.find(prefix-target)==mp.end()){
+            }
+            else{
+                maxLen=max(maxLen,i-mp[prefix-target]);
+            }
+        }
+        if(maxLen==-1) return -1;
+        return nums.size()-maxLen;
+    }
+
+
+
+
+// two approaches
+    // first is to use two stacks or stack of pairs
+    // where for each element we can store minimum till then
+    
+    // other one in one we can can calculate min with the help of prev element
+    stack<int> st;
+    int mini;
+    MinStack() {
+        
+    }
+    
+    void push(int val) {
+        if(st.empty()){
+            st.push(val);
+            mini=val;
+        }
+        else{
+            if(val>=mini) st.push(val);
+            else{
+                st.push(2*val-mini);
+                mini=val;
+            }
+        }
+    }
+    
+    void pop() {
+        int curr=st.top();
+        st.pop();
+        if(curr<=mini){
+            mini=2*mini-curr;
+        }
+    }
+    
+    int top() {
+        int curr=st.top();
+        if(curr<mini) return mini;
+        else return curr;
+    }
+    
+    int getMin() {
+        if(st.empty()) return -1;
+        return mini;
+    }
+
+
+
+
+
+class NStack
+{
+    int *arr;
+    int *top;
+    int *next;
+    
+    int n, s;
+     
+    int freespot;
+    
+public:
+    // Initialize your data structure.
+    NStack(int N, int S)
+    {
+        n = N;
+        s = S;
+        arr = new int[s];
+        top = new int[n];
+        next = new int[s];
+        
+        //top initialise
+        for(int i=0; i<n; i++) {
+            top[i] = -1;
+        }
+        
+        //next initialise
+        for(int i=0; i<s; i++) {
+            next[i] = i+1;
+        }
+        //update last index value to -1
+        next[s-1] = -1;
+        
+        //initialise freespot
+        freespot = 0;
+        
+    }
+
+    // Pushes 'X' into the Mth stack. Returns true if it gets pushed into the stack, and false otherwise.
+    bool push(int x, int m)
+    {
+        //check for overflow
+        if(freespot == -1) {
+            return false;
+        }
+        
+        //find index
+        int index = freespot;
+        
+        //insert element into array
+        arr[index] = x;
+        
+        //update freespot
+        freespot = next[index];
+       
+        //update next;
+        next[index] = top[m-1];
+        
+        //update top
+        top[m-1] = index;
+        
+        return true;
+    }
+
+    // Pops top element from Mth Stack. Returns -1 if the stack is empty, otherwise returns the popped element.
+    int pop(int m)
+    {
+        //check underflow condition
+        if(top[m-1] == -1) {
+            return -1;
+        }
+        
+        int index= top[m-1];
+        
+        top[m-1] = next[index];
+        
+        next[index] = freespot;
+        
+        freespot = index;
+        
+        return arr[index];
+    }
+};
+
+
+
+
+
+
