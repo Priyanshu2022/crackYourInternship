@@ -61,3 +61,36 @@
         }
         return a;
     }
+
+
+
+// quick sort
+int partition (int arr[], int low, int high)
+    {
+      int pivot=arr[low];
+      int count=0;
+      for(int i=low+1;i<=high;i++){
+          if(arr[i]<=pivot) count++;
+      }
+      int pivotIndex=low+count;
+      swap(arr[low],arr[pivotIndex]);
+      int s=low;
+      int h=high;
+      while(s<pivotIndex && h>pivotIndex){
+          while(arr[s]<=pivot) s++;
+          while(arr[h]>pivot) h--;
+          if(s<pivotIndex && h>pivotIndex){
+              swap(arr[s],arr[h]);
+              s++;
+              h--;
+          }
+      }
+      return pivotIndex;
+    }
+    void quickSort(int arr[], int low, int high)
+    {
+        if(low>=high) return ;
+        int p=partition(arr,low,high);
+        quickSort(arr,low,p-1);
+        quickSort(arr,p+1,high);
+    }

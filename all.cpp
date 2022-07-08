@@ -8809,4 +8809,852 @@ public:
 
 
 
+// stack vs heap 
+// function calls(stack frame) are stored in memory stack 
+// memory stack is of fixed size , it may result is stack overflow
+// memory allocation and deallocation is done by stack memory itself
+
+// heap is dynamic memory allocation (no fix size)
+// manually allocate memory or deallocate memory
+// int * p=new int();
+// *p=10;
+// new operator is used to allocate memory in heap 
+// p will point to memory address in heap 
+// delete(p) deallocate memory
+
+// p=new int[4];
+// delete[]p;
+// we can change size of array in runtime in heap 
+
+
+
+// asymptotic notations
+// big-oh (upper bound)
+// big-omega (lower bound)
+// theta (average bound)
+
+// f(n)=2n+3 <=5n,5n^2, closest => n
+
+
+
+
+int firstMissingPositive(vector<int>& nums) {
+        int n=nums.size();
+        for(int i=0;i<n;i++){
+            if(nums[i]<=0) continue;
+            if(nums[i]!=(i+1) && nums[i]<=n && nums[i]!=nums[nums[i]-1]){
+                swap(nums[i],nums[nums[i]-1]);
+                i--;
+            }
+        }
+        for(int i=0;i<n;i++){
+            if(nums[i]!=(i+1)) return i+1;
+        }
+        return n+1;
+    }
+
+
+
+
+static bool cmp(const int &a,const int &b){
+        string s1=to_string(a);
+        string s2=to_string(b);
+        return s1+s2>s2+s1;
+    }
+    string largestNumber(vector<int>& nums) {
+        sort(nums.begin(),nums.end(),cmp);
+        string ans="";
+        for(int i=0;i<nums.size();i++){
+            ans+=to_string(nums[i]);
+        }
+        int j=0;
+        while(ans.size()>1 && ans[j]=='0') ans.erase(0,1);
+        return ans;
+    }
+
+
+
+
+bool solve(int i,int j,string &s ,string &p,vector<vector<int>> &dp){
+        if(i<0 && j<0) return true;
+        if(i>=0 && j<0) return false;
+        if(i<0 && j>=0){
+            if(p[j]=='*') return solve(i,j-2,s,p,dp);
+            else return false;
+        }
+        if(dp[i][j]!=-1) return dp[i][j];
+        if(s[i]==p[j] || p[j]=='.') return dp[i][j]= solve(i-1,j-1,s,p,dp);
+        if(p[j]=='*'){
+            if(s[i]==p[j-1] || p[j-1]=='.') return dp[i][j]= solve(i-1,j,s,p,dp) || solve(i,j-2,s,p,dp);
+            else return dp[i][j]= solve(i,j-2,s,p,dp);
+        }
+        return dp[i][j]= false;
+    }
+    bool isMatch(string s, string p) {
+        int n=s.size();
+        int m=p.size();
+        vector<vector<int>> dp(n,vector<int>(m,-1));
+        return solve(n-1,m-1,s,p,dp);
+    }
+
+
+
+// two approches one with n space other with constant
+    // maintaine two arrays 
+    // one of considering that only left part ratings i.e. if left's rating is less , add one to current ,else reset to one
+    // similarly for right part , sum of max of every position will be answer
+    
+    // Optimal
+    // at every peak calculate answer 
+    int candy(vector<int>& a) {
+        int ans=0;
+        int n=a.size();
+        int i=0;
+        while(i<n){
+            int lc=1,rc=1;
+            while((i+1)<n && a[i+1]>a[i]) i++,lc++;
+            while((i+1)<n && a[i+1]<a[i]) i++,rc++;
+            if(lc>rc) ans+=lc*(lc+1)/2+(rc-1)*(rc)/2;
+            else ans+=rc*(rc+1)/2 + (lc-1)*(lc)/2;
+            if(i+1<n && a[i+1]>a[i]) ans--,i--;
+            i++;
+        }
+        return ans;
+    }
+
+
+
+// count distinct in every window of size k
+vector <int> countDistinct (int A[], int n, int k)
+    {
+        map<int,int> mp;
+        vector<int> ans;
+        int distinct=0;
+        for(int i=0;i<k;i++) mp[A[i]]++;
+        ans.push_back(mp.size());
+        for(int i=k;i<n;i++){
+            mp[A[i]]++;
+            mp[A[i-k]]--;
+            if(mp[A[i-k]]==0) mp.erase(A[i-k]);
+            ans.push_back(mp.size());
+        }
+        return ans;
+    }
+
+
+
+// delete a node in bst
+// find the node , delete it by connecting largest of left tree with right
+TreeNode* rightMostFromLeft(TreeNode* root){
+        if(root->right==NULL) return root;
+        return rightMostFromLeft(root->right);
+    }
+    TreeNode* solve(TreeNode* root){
+        if(root->left==NULL) return root->right;
+        if(root->right==NULL) return root->left;
+        TreeNode* rightChild=root->right;
+        TreeNode* rightMost=rightMostFromLeft(root->left);
+        rightMost->right=rightChild;
+        return root->left;
+    }
+    TreeNode* deleteNode(TreeNode* root, int key) {
+        if(root==NULL) return NULL;
+        if(root->val==key) return solve(root);
+        TreeNode* cur=root;
+        while(cur){
+            if(cur->val>key){
+                if(cur->left && cur->left->val==key){
+                    cur->left=solve(cur->left);
+                    break;
+                }
+                else{
+                    cur=cur->left;
+                }
+            }
+            else{
+                if(cur->right && cur->right->val==key){
+                    cur->right=solve(cur->right);
+                    break;
+                }
+                else{
+                    cur=cur->right;
+                }
+            }
+        }
+        return root;
+    }
+
+
+// find median from data stream
+// manitain a min heap and a max heap
+// top of maxheap is greater than number push in maxheap
+// else in minheap
+// if differnce of size is more than one , transfer one element from one to another
+// Now to get median -> if size are equal , add the top and divide by 2
+// else return the top of greater size
+priority_queue<int> maxheap;
+    priority_queue<int,vector<int>,greater<int>> minheap;
+    MedianFinder() {
+        
+    }
+    
+    void addNum(int num) {
+        if(maxheap.empty() || maxheap.top()>=num){
+            maxheap.push(num);
+        }
+        else{
+            minheap.push(num);
+        }
+        if(maxheap.size()>minheap.size()+1){
+            minheap.push(maxheap.top());
+            maxheap.pop();
+        }
+        else if(minheap.size()>maxheap.size()+1){
+            maxheap.push(minheap.top());
+            minheap.pop();
+        }
+    }
+    
+    double findMedian() {
+        if(maxheap.size()==minheap.size()) return (maxheap.top()+minheap.top())/2.0;
+        return maxheap.size()>minheap.size()?maxheap.top():minheap.top();
+    }
+
+
+// get the maximum score
+int mod=1000000007;
+    int maxSum(vector<int>& nums1, vector<int>& nums2) {
+        ll ans=0,sum1=0,sum2=0;
+        int i=0,j=0;
+        int n=nums1.size();
+        int m=nums2.size();
+        while(i<n && j<m){
+            if(nums1[i]<nums2[j]) sum1+=nums1[i++];
+            else if(nums1[i]>nums2[j]) sum2+=nums2[j++];
+            else{
+                ans+=max(sum1,sum2)%mod+nums1[i];
+                i++;
+                j++;
+                sum1=sum2=0;
+            }
+        }
+        while(i<n) sum1+=nums1[i++];
+        while(j<m) sum2+=nums2[j++];
+        ans+=max(sum1,sum2);
+        return ans%mod;
+    }
+
+
+// matrix traversal
+// i+j remains same
+ll n;
+    cin>>n;
+    ll a[n][n];
+    for(int i=0;i<n;i++){
+        for(int j=0;j<n;j++){
+            cin>>a[i][j];
+        }
+    }
+
+    vector<vector<ll>> v(2*n-1);
+
+    for(int i=n-1;i>=0;i--){
+        for(int j=0;j<n;j++){
+            v[i+j].push_back(a[i][j]);
+        }
+    }
+
+    for(auto it:v){
+        for(auto cur:it) cout<<cur<<" ";
+        cout<<endl;
+    }
+
+
+
+// prefix and suffix search
+// make a map of string ,int
+// for every prefix and suffix pair store the index of word 
+unordered_map<string,int> mp;
+    WordFilter(vector<string>& words) {
+        for(int i=0;i<words.size();i++){
+            string word=words[i];
+            for(int j=1;j<=word.size();j++){
+                string p=word.substr(0,j);
+                for(int k=0;k<word.size();k++){
+                    string s=word.substr(k);
+                    mp[p+"-"+s]=i;
+                }
+            }
+        }
+    }
+    
+    int f(string prefix, string suffix) {
+        if(mp.find(prefix+'-'+suffix)==mp.end()) return -1;
+        else return mp[prefix+'-'+suffix];
+    }
+
+
+
+// search suggestion 
+struct Node{
+        Node* links[26];
+        bool flag=false;
+        bool containsKey(char ch){
+            return (links[ch-'a']!=NULL);
+        }
+        void put(char ch,Node* node){
+            links[ch-'a']=node;
+        }
+        Node* get(char ch){
+            return links[ch-'a'];
+        }
+        void setEnd(){
+            flag=true;
+        }
+        bool isEnd(){
+            return flag;
+        }
+    };
+class Solution {
+public:
+    Node* root=new Node();
+    void insert(string word){
+        Node* node =root;
+        for(int i=0;i<word.length();i++){
+            if(node->containsKey(word[i])){
+                node=node->get(word[i]);
+            }
+            else{
+                node->put(word[i],new Node());
+                node=node->get(word[i]);
+            }
+        }
+        node->setEnd();
+    }
+    vector<string> search(string prefix){
+        Node* node=root;
+        for(int i=0;i<prefix.size();i++){
+            if(!node->containsKey(prefix[i])){
+                return {};
+            }
+            node=node->get(prefix[i]);
+        }
+        vector<string> res;
+        dfs(node,prefix,res);
+        return res;
+    }
+    void dfs(Node* node,string pre,vector<string> &res){
+        if(res.size()==3) return ;
+        if(node->isEnd()) res.push_back(pre);
+        for(int i=0;i<26;i++){
+            if(node->containsKey((char)(i+'a'))){
+                dfs(node->get((char)(i+'a')),pre+(char)(i+'a'),res);
+            }
+        }
+    }
+    vector<vector<string>> suggestedProducts(vector<string>& products, string searchWord) {
+        for(int i=0;i<products.size();i++){
+            insert(products[i]);
+        }
+        vector<vector<string>> ans;
+        string prefix="";
+        for(int i=0;i<searchWord.size();i++){
+            prefix+=searchWord[i];
+            ans.push_back(search(prefix));
+        }
+        return ans;
+    }
+};
+
+
+// sum of numbers with unique digits k 
+int minimumNumbers(int num, int k) {
+        if(num==0) return 0;
+        if(k==0) num%10==0?1:0;
+        for(int i=1;i*k<=num && i<=10;i++){
+            if((num-i*k)%10==0) return i;
+        }
+        return -1;
+    }
+
+
+
+// bst to greater tree
+void solve(TreeNode* root,int &sum){
+        if(root==NULL) return ;
+        solve(root->right,sum);
+        sum+=root->val;
+        root->val=sum;
+        solve(root->left,sum);
+    }
+    TreeNode* convertBST(TreeNode* root) {
+        int sum=0;
+        solve(root,sum);
+        return root;
+    }
+
+
+// consecutive 1's not allowed
+// dp[0][i] -> string ending at 1 of length i
+    // d[1][i] -> string ending at 0 of length i
+    ll countStrings(int n) {
+        ll mod=1e9+7;
+        vector<vector<ll>> dp(2,vector<ll>(n+1,0));
+        dp[0][0]=0;
+        dp[1][0]=0;
+        dp[0][1]=1;
+        dp[1][1]=1;
+        for(int i=2;i<=n;i++){
+            dp[0][i]=dp[1][i-1];
+            dp[1][i]=(dp[0][i-1]+dp[1][i-1])%mod;
+        }
+        return (dp[0][n]+dp[1][n])%mod;
+    }
+
+
+
+// construct target array with multiple sums
+// convert array to 1 1 1 . . 
+using ll=long long ;
+class Solution {
+public:
+    bool isPossible(vector<int>& target) {
+        ll sum=0;
+        priority_queue<ll> pq;
+        for(auto it:target) pq.push(it),sum+=it;
+        while(!pq.empty()){
+            ll maxi=pq.top();
+            pq.pop();
+            ll remaining_sum=sum-maxi;
+            if(maxi==1 || remaining_sum==1) return true;
+            if(remaining_sum==0 || maxi<remaining_sum) return false;
+            ll new_val=maxi%remaining_sum;
+            if(new_val==0) return false;
+            pq.push(new_val);
+            sum=remaining_sum+new_val;
+        }
+        return true;
+    }
+};
+
+
+
+
+static bool cmp(vector<int> &v1,vector<int> &v2){
+        if(v1[1]<v2[1]) return true;
+        else if(v1[1]>v2[1]) return false;
+        return v1[0]<v2[0];
+    }
+    int scheduleCourse(vector<vector<int>>& courses) {
+        sort(courses.begin(),courses.end(),cmp);
+        priority_queue<int> pq;
+        int time=0;
+        for(int i=0;i<courses.size();i++){
+            if(time+courses[i][0]<=courses[i][1]){
+                pq.push(courses[i][0]);
+                time+=courses[i][0];
+            }
+            else{
+                if(!pq.empty() && pq.top()>=courses[i][0]){
+                    time-=pq.top()-courses[i][0];
+                    pq.pop();
+                    pq.push(courses[i][0]);
+                }
+            }
+        }
+        return pq.size();
+    }
+
+
+
+void solve(TreeNode* root,int level,int &maxLevel,int &ans){
+        if(root==NULL) return ;
+        if(root->left==NULL && root->right==NULL){
+            if(level>maxLevel){
+                ans=root->val;
+                maxLevel=level;
+                return ;
+            }
+        }
+        solve(root->left,level+1,maxLevel,ans);
+        solve(root->right,level+1,maxLevel,ans);
+    }
+    int findBottomLeftValue(TreeNode* root) {
+        int level=0;
+        int maxLevel=-1;
+        int ans=-1;
+        solve(root,level,maxLevel,ans);
+        return ans;
+    }
+
+
+// lexio smallest subseq of size k 
+// we can remove n-k from the subarray
+// if top is greater and we can remove element than remove
+vector<int> mostCompetitive(vector<int>& nums, int k) {
+        int n=nums.size();
+        int elToRemove=n-k;
+        stack<int> st;
+        for(int i=0;i<nums.size();i++){
+            while(!st.empty() && elToRemove && st.top()>nums[i]){
+                st.pop();
+                elToRemove--;
+            }
+            st.push(nums[i]);
+        }
+        
+        // taking bottom k elements of stack
+        vector<int> ans(k);
+        while(st.size()!=k) st.pop();
+        while(!st.empty()){
+            ans[k-1]=st.top();
+            st.pop();
+            k--;
+        }
+        return ans;
+    }
+
+
+// insert delete get random
+unordered_map<int,int> mp;
+    vector<int> v;
+    RandomizedSet() {
+        
+    }
+    
+    bool insert(int val) {
+        if(mp.find(val)!=mp.end()) return false;
+        mp[val]=v.size();
+        v.push_back(val);
+        return true;
+    }
+    
+    bool remove(int val) {
+        if(mp.find(val)==mp.end()) return false;
+        int ind=mp[val];
+        v[ind]=v.back();
+        mp[v[ind]]=ind;
+        v.pop_back();
+        mp.erase(val);
+        return true;
+    }
+    
+    int getRandom() {
+        return v[rand()%v.size()];
+    }
+
+
+// minimum cost of ropes 
+long long minCost(long long arr[], long long n) {
+        long long ans=0;
+        priority_queue<long long ,vector<long long >,greater<long long >> pq;
+        for(int i=0;i<n;i++) pq.push(arr[i]);
+        while(!pq.empty()){
+            long long first=pq.top();
+            pq.pop();
+            if(pq.empty()) break;
+            long long second=pq.top();
+            pq.pop();
+            ans+=first+second;
+            pq.push(first+second);
+        }
+        return ans;
+    }
+
+
+
+// most frequent subtree sum
+int solve(TreeNode* root,unordered_map<int,int> &mp,int &maxi){
+        if(root==NULL) return 0;
+        int sum=root->val;
+        sum+=solve(root->left,mp,maxi);
+        sum+=solve(root->right,mp,maxi);
+        mp[sum]++;
+        maxi=max(maxi,mp[sum]);
+        return sum;
+    }
+    vector<int> findFrequentTreeSum(TreeNode* root) {
+        unordered_map<int,int> mp;
+        int maxi=INT_MIN;
+        solve(root,mp,maxi);
+        vector<int> ans;
+        for(auto it:mp){
+            if(it.second==maxi){
+                ans.push_back(it.first);
+            }
+        }
+        return ans;
+    }
+
+
+// non decreasing array
+// making the element minimum is optimal
+    bool checkPossibility(vector<int>& nums) {
+        int count=0;
+        for(int i=1;i<nums.size();i++){
+            if(nums[i]<nums[i-1]){
+                count++;
+                if(i==1){
+                    nums[i-1]=nums[i];
+                    continue;
+                }
+                if(nums[i-2]>nums[i]) nums[i]=nums[i-1];
+                else nums[i-1]=nums[i];
+            }
+        }
+        return count<=1;
+    }
+
+
+// sum root to leaf numbers
+void solve(TreeNode* root,int curSum,int &sum){
+        if(root==NULL) return ;
+        if(root->left==NULL && root->right==NULL){
+            sum+=curSum*10+root->val;
+            return ;
+        }
+        solve(root->left,curSum*10+root->val,sum);
+        solve(root->right,curSum*10+root->val,sum);
+    }
+    int sumNumbers(TreeNode* root) {
+        int curSum=0;
+        int sum=0;
+        solve(root,curSum,sum);
+        return sum;
+    }
+
+
+// two city scheduling
+static bool cmp(vector<int> &v1,vector<int> &v2){
+        return v1[0]-v1[1]<v2[0]-v2[1];
+    }
+    int twoCitySchedCost(vector<vector<int>>& costs) {
+        sort(costs.begin(),costs.end(),cmp);
+        int ans=0;
+        for(int i=0;i<costs.size();i++){
+            if(i<costs.size()/2) ans+=costs[i][0];
+            else ans+=costs[i][1];
+        }
+        return ans;
+    }
+
+// Allright so whenever you call a non-static member function of class outside of a class you do something like this,
+// obj a;
+// a.compare(b); //2 parameters are required - a & b
+// i.e. for non-static member functions, we have to provide an extra parameter for the implicit this.
+
+// Whereas making a member function static allows this call,
+// Solution:: compare(b); //Just 1 parameter required
+
+// Similarly, since the code for sort will be executed outside your class, we've to declare it static else the first parameter in your comparator function will be used as the implicit first parameter for this in non-static member functions.
+
+
+// count good nodes in binary tree
+void solve(TreeNode* root,int maxi,int &ans){
+        if(root==NULL) return ;
+        solve(root->left,max(maxi,root->val),ans);
+        if(root->val>=maxi) ans++;
+        solve(root->right,max(maxi,root->val),ans);
+    }
+    int goodNodes(TreeNode* root) {
+        int ans=0;
+        solve(root,INT_MIN,ans);
+        return ans;
+    }
+
+
+
+string infixToPostfix(string s) {
+        string ans="";
+        stack<char> st;
+        for(int i=0;i<s.length();i++){
+            if(s[i]=='(') st.push(s[i]);
+            else if(s[i]==')'){
+                while(st.top()!='('){
+                    ans+=st.top();
+                    st.pop();
+                }
+                st.pop();
+            }
+            else if(s[i]=='-' || s[i]=='+'){
+                if(st.empty()){
+                    st.push(s[i]);
+                    continue;
+                }
+                while(st.top()=='*' || st.top()=='/' || st.top()=='^' || st.top()=='-' || st.top()=='+'){
+                    ans+=st.top();
+                    st.pop();
+                    if(st.empty()) break;
+                }
+                st.push(s[i]);
+            }
+            else if(s[i]=='*' || s[i]=='/'){
+                if(st.empty()){
+                    st.push(s[i]);
+                    continue;
+                }
+                while(st.top()=='^' || st.top()=='*' || st.top()=='/'){
+                    ans+=st.top();
+                    st.pop();
+                    if(st.empty()) break;
+                }
+                st.push(s[i]);
+            }
+            else if(s[i]=='^'){
+                if(st.empty()){
+                    st.push(s[i]);
+                    continue;
+                }
+                while(st.top()=='^'){
+                    ans+=st.top();
+                    st.pop();
+                    if(st.empty()) break;
+                }
+                st.push(s[i]);
+            }
+            else ans+=s[i];
+        }
+        while(!st.empty()){
+            ans+=st.top();
+            st.pop();
+        }
+        return ans;
+    }
+
+
+string ones[20]={"","one ","two ","three ","four ","five ","six ","seven ","eight ","nine ","ten ","eleven ","twelve ","thirteen ","fourteen ","fifteen ","sixteen ","seventeen ","eighteen ","nineteen "};
+    string tens[10]={"","","twenty ","thirty ","forty ","fifty ","sixty ","seventy ","eighty ","ninety "};
+    
+    string numToWord(int n,string s){
+        string ans="";
+        if(n>19){
+            ans+=tens[n/10]+ones[n%10];
+        }
+        else{
+            ans+=ones[n];
+        }
+        if(n) ans+=s;
+        return ans;
+    }
+    string convertToWords(long n) {
+        string res="";
+        res+=numToWord(n/10000000,"crore ");
+        res+=numToWord((n/100000)%100,"lakh ");
+        res+=numToWord((n/1000)%100,"thousand ");
+        res+=numToWord(((n/100)%10),"hundred ");
+        if(n>100 && n%100){
+            res+="and ";
+        }
+        res+=numToWord(n%100,"");
+        res.pop_back();
+        return res;
+    }
+
+
+// jump game 2
+// there variables -> jumps, cur, farthest
+int jump(vector<int>& nums) {
+        int n=nums.size();
+        
+        int jumps=0;
+        int cur=0;
+        int farthest=0;
+        for(int i=0;i<n-1;i++){
+            farthest=max(farthest,i+nums[i]);
+            if(i==cur){
+                jumps++;
+                cur=farthest;
+            }
+        }
+        return jumps;
+    }
+
+
+// kmp
+vector <int> search(string p, string s)
+        {
+            int m=p.size();
+            int n=s.size();
+            vector<int> lps(m);
+            lps[0]=0;
+            int len=0;
+            int i=1;
+            while(i<m){
+                if(p[i]==p[len]){
+                    lps[i++]=++len;
+                }else{
+                    if(len==0) lps[i++]=0;
+                    else len=lps[len-1];
+                }
+            }
+            i=0;
+            int j=0;
+            vector<int> ans;
+            while(i<n){
+                if(p[j]==s[i]){
+                    i++;
+                    j++;
+                }
+                if(j==m){
+                    ans.push_back(i-j+1);
+                    j=lps[j-1];
+                }else if(i<n && p[j]!=s[i]){
+                    if(j!=0){
+                        j=lps[j-1];
+                    }
+                    else i++;
+                }
+            }
+            return ans;
+        }
+
+
+
+int minMoves2(vector<int>& nums) {
+        sort(nums.begin(),nums.end());
+        int midean=nums[nums.size()/2];
+        int ans=0;
+        for(int i=0;i<nums.size();i++) ans+=abs(nums[i]-midean);
+        return ans;
+    }
+
+
+int doOverlap(int l1[], int r1[], int l2[], int r2[]) {
+        if(r2[1]>l1[1] || r1[1]>l2[1] || r2[0]<l1[0] || r1[0]<l2[0]) return false;
+        return true;
+    }
+
+
+
+static bool cmp(vector<int> &v1,vector<int> &v2){
+        if(v1[0]==v2[0]) return v1[1]<v2[1];
+        return v1[0]>v2[0];
+    }
+    vector<vector<int>> reconstructQueue(vector<vector<int>>& people) {
+        sort(people.begin(),people.end(),cmp);
+        vector<vector<int>> ans;
+        for(auto it:people){
+            ans.insert(ans.begin()+it[1],it); // elements before this are greater 
+        }
+        return ans;
+    }
+
+
+// wiggle subsequnce
+int wiggleMaxLength(vector<int>& nums) {
+        int n=nums.size();
+        if(n==1) return 1;
+        int prev=nums[1]-nums[0];
+        int ans=2;
+        if(prev==0) ans=1;
+        for(int i=2;i<n;i++){
+            if((prev>=0 && (nums[i]-nums[i-1])<0)||(prev<=0 && (nums[i]-nums[i-1]>0))){
+                prev=nums[i]-nums[i-1];
+                ans++;
+            }
+        }
+        return ans;
+    }
+
+
 
